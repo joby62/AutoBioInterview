@@ -4,773 +4,157 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>数字学习自传访谈</title>
-    <style>
-        :root {
-            --bg-color: #f5f5f7;
-            --content-bg-color: #ffffff;
-            --text-color-primary: #1d1d1f;
-            --text-color-secondary: #6e6e73;
-            --accent-color: #007aff;
-            --accent-color-hover: #0071e3;
-            --assistant-msg-bg: #f5f5f7;
-            --border-color: #d2d2d7;
-            --danger: #d92d20;
-            --ok: #1f8f4d;
-            --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        body {
-            font-family: var(--font-family);
-            margin: 0;
-            padding: 18px;
-            background-color: var(--bg-color);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            color: var(--text-color-primary);
-        }
-
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: var(--content-bg-color);
-            border-radius: 18px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
-            border: 1px solid #e3e3e3;
-        }
-
-        .header {
-            text-align: center;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .header h1 {
-            font-size: 1.32rem;
-            margin: 0;
-            font-weight: 600;
-        }
-        .header p {
-            margin: 6px 0 0;
-            color: var(--text-color-secondary);
-            font-size: 0.9rem;
-        }
-
-        .progress-stepper {
-            display: flex;
-            justify-content: space-between;
-            list-style: none;
-            padding: 12px 10px;
-            margin: 0;
-            border-bottom: 1px solid var(--border-color);
-            gap: 4px;
-            overflow-x: auto;
-        }
-        .progress-stepper .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-width: 72px;
-            flex: 1;
-        }
-        .progress-stepper .step-dot {
-            height: 22px;
-            width: 22px;
-            border-radius: 50%;
-            background-color: #e5e5e5;
-            border: 2px solid #e5e5e5;
-            margin-bottom: 6px;
-            font-size: 11px;
-            line-height: 18px;
-            font-weight: 600;
-            color: var(--text-color-secondary);
-        }
-        .progress-stepper .step-name {
-            font-size: 11px;
-            color: var(--text-color-secondary);
-            white-space: nowrap;
-        }
-        .progress-stepper .step.active .step-dot {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            color: #fff;
-        }
-        .progress-stepper .step.completed .step-dot {
-            background-color: #34c759;
-            border-color: #34c759;
-            color: #fff;
-        }
-        .progress-stepper .step.alert .step-dot {
-            background: var(--danger);
-            border-color: var(--danger);
-            color: #fff;
-        }
-
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .consent-panel {
-            display: none;
-            margin: 16px 18px 0;
-            padding: 14px;
-            border: 1px solid #d8e4ff;
-            background: #f4f8ff;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.55;
-        }
-        .consent-panel.visible { display: block; }
-        .consent-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .messages {
-            flex: 1;
-            padding: 18px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            max-width: 84%;
-            padding: 12px 14px;
-            border-radius: 16px;
-            line-height: 1.52;
-            animation: fadeIn 0.3s ease-out;
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-size: 14px;
-        }
-        .message.user {
-            align-self: flex-end;
-            background: var(--accent-color);
-            color: #fff;
-            border-bottom-right-radius: 5px;
-        }
-        .message.assistant {
-            align-self: flex-start;
-            background: var(--assistant-msg-bg);
-            border: 1px solid #e5e5e5;
-            border-bottom-left-radius: 5px;
-        }
-        .message.system {
-            align-self: center;
-            background: #fff8eb;
-            border: 1px solid #f5d28f;
-            color: #7b4f00;
-            max-width: 95%;
-        }
-        .message.assistant.typing::after {
-            content: "▋";
-            animation: blink 1s infinite;
-            margin-left: 5px;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        .input-area {
-            padding: 12px 18px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        textarea {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            resize: none;
-            height: 48px;
-            font-family: inherit;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
-        }
-
-        .circle-btn {
-            height: 44px;
-            width: 44px;
-            border: none;
-            border-radius: 50%;
-            background: var(--accent-color);
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .circle-btn:disabled {
-            background: #b0b0b0;
-            cursor: not-allowed;
-        }
-
-        .footer-controls {
-            border-top: 1px solid var(--border-color);
-            padding: 10px 12px;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            padding: 10px 14px;
-            font-size: 13px;
-            font-family: inherit;
-        }
-        .btn.primary { background: var(--ok); color: #fff; }
-        .btn.secondary { background: #6c757d; color: #fff; }
-        .btn.warning { background: #ff9f0a; color: #fff; }
-        .btn.danger { background: var(--danger); color: #fff; }
-        .btn.ghost { background: #eceef1; color: #222; }
-        .btn:disabled { background: #c4c8cc; cursor: not-allowed; }
-
-        .review-controls {
-            display: none;
-            width: 100%;
-            text-align: center;
-            margin-top: 2px;
-        }
-        .review-controls.visible { display: block; }
-
-        .status-line {
-            text-align: center;
-            color: var(--text-color-secondary);
-            font-size: 12px;
-            padding-bottom: 8px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.48);
-            backdrop-filter: blur(7px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.25s, visibility 0.25s;
-            z-index: 1000;
-        }
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background: #fff;
-            border-radius: 14px;
-            width: min(900px, 92vw);
-            max-height: 86vh;
-            overflow: auto;
-            padding: 20px;
-            box-shadow: 0 18px 34px rgba(0,0,0,0.17);
-        }
-        .modal-content h2 {
-            margin: 0 0 10px;
-            font-size: 22px;
-        }
-        .modal-content pre {
-            white-space: pre-wrap;
-            line-height: 1.72;
-            font-size: 15px;
-            color: #2b2b2b;
-            font-family: "Palatino", "Georgia", serif;
-        }
-
-        @media (max-width: 760px) {
-            body { padding: 10px; }
-            .message { max-width: 92%; }
-            .header h1 { font-size: 1.15rem; }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>数字学习自传访谈</h1>
-        <p>你可随时跳过问题、撤回访谈，或在草稿阶段继续修改。</p>
-    </div>
+<div class="ambient"></div>
 
-    <ul class="progress-stepper" id="stageList"></ul>
+<div class="app-shell">
+    <aside class="left-panel">
+        <section class="brand-card">
+            <span class="brand-tag">Autobiography Lab</span>
+            <h1 class="brand-title">数字学习自传</h1>
+            <p class="brand-subtitle">通过连续、具体的故事追问，帮助受访者生成可用的研究自传文本。</p>
+        </section>
 
-    <div class="chat-area">
-        <div class="consent-panel" id="consentPanel">
+        <section class="stage-card">
+            <h3 class="card-title">访谈进度</h3>
+            <div class="stage-rail" id="stageRail"></div>
+        </section>
+
+        <section class="guide-card">
+            <h2 class="guide-title" id="guideTitle">访谈引导</h2>
+            <p class="guide-desc" id="guideDesc"></p>
+            <ul class="guide-list" id="guideList"></ul>
+            <div class="guide-examples" id="guideExamples"></div>
+        </section>
+
+        <section class="rights-card">
+            <h3 class="card-title">参与者权益</h3>
+            <ul class="rights-list">
+                <li>可跳过任何问题，不需要解释。</li>
+                <li>可随时撤回访谈。</li>
+                <li>可上传替代材料（音频/视频转写）。</li>
+                <li>生成草稿后可继续修改再定稿。</li>
+                <li>系统会对敏感信息做匿名化处理。</li>
+            </ul>
+        </section>
+    </aside>
+
+    <main class="main-panel">
+        <header class="topbar">
             <div>
-                参与须知：内容仅用于学术研究，发布时会匿名化处理。你有权拒答任何问题、随时暂停或撤回。
-                如果不便文字输入，可通过“替代提交”提供音频/视频链接和转写。
+                <h2 class="topbar-title">访谈控制台</h2>
+                <p class="topbar-sub">像聊天一样完成访谈，重点是“具体场景 + 真实感受 + 关键变化”。</p>
+                <div class="meta-row">
+                    <span class="pill stage" id="stageBadge" data-stage="consent_pending">待同意</span>
+                    <span class="pill" id="tokenBadge">未开始</span>
+                    <span class="pill" id="statsBadge">暂无记录</span>
+                </div>
             </div>
+            <div class="topbar-actions">
+                <button class="btn btn-plain theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">切换主题</button>
+                <button class="btn btn-brand" id="newInterviewBtn" onclick="startNewInterview()">开启新访谈</button>
+                <button class="btn btn-danger" id="withdrawBtn" onclick="withdrawInterview()">撤回访谈</button>
+            </div>
+        </header>
+
+        <section class="consent-strip" id="consentStrip">
+            <h3 class="consent-title">请先确认知情同意</h3>
+            <p class="consent-copy">
+                本访谈用于博士研究，内容将匿名化处理。你有权拒答、跳过、暂停或撤回。若不便文字输入，可使用替代提交。
+            </p>
             <div class="consent-actions">
-                <button class="btn primary" onclick="handleConsent(true)">我同意并开始</button>
-                <button class="btn ghost" onclick="handleConsent(false)">不同意参与</button>
+                <button class="btn btn-primary" id="consentAgreeBtn" onclick="handleConsent(true)">我同意并开始</button>
+                <button class="btn btn-plain" id="consentRejectBtn" onclick="handleConsent(false)">不同意参与</button>
             </div>
-        </div>
+        </section>
 
-        <div class="messages" id="messages"></div>
+        <section class="messages-wrap">
+            <div class="messages" id="messages"></div>
+        </section>
 
-        <div class="input-area">
-            <textarea id="userInput" placeholder="输入你的回答..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"></textarea>
-            <button id="sendBtn" class="circle-btn" onclick="sendMessage()" title="发送">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
-            </button>
-        </div>
-    </div>
-
-    <div class="footer-controls">
-        <button class="btn secondary" onclick="startNewInterview()">开启新访谈</button>
-        <button id="skipBtn" class="btn warning" onclick="skipQuestion()">跳过本题</button>
-        <button id="altBtn" class="btn ghost" onclick="submitAlternative()">替代提交</button>
-        <button id="finalizeBtn" class="btn primary" onclick="finalizeInterview()">生成草稿</button>
-        <button id="withdrawBtn" class="btn danger" onclick="withdrawInterview()">撤回访谈</button>
-
-        <div class="review-controls" id="reviewControls">
-            <button class="btn ghost" onclick="reviseDraft()">继续修改草稿</button>
-            <button class="btn primary" onclick="approveFinal()">确认定稿</button>
-        </div>
-    </div>
-    <div class="status-line" id="statusLine"></div>
+        <section class="composer">
+            <div class="quick-chip-row" id="quickChips"></div>
+            <div class="composer-row">
+                <textarea id="userInput" placeholder="输入你的回答（回车发送，Shift+回车换行）" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"></textarea>
+                <button class="circle-btn" id="sendBtn" onclick="sendMessage()" title="发送">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="action-row">
+                <div class="action-left">
+                    <button class="btn btn-warning" id="skipBtn" onclick="skipQuestion()">跳过本题</button>
+                    <button class="btn btn-secondary" id="altBtn" onclick="openAltModal()">替代提交</button>
+                    <button class="btn btn-primary" id="finalizeBtn" onclick="finalizeInterview()">生成草稿</button>
+                </div>
+                <div class="action-right review-actions" id="reviewActions">
+                    <button class="btn btn-secondary" onclick="openDraftModal()">查看草稿</button>
+                    <button class="btn btn-secondary" onclick="focusRevisionInput()">继续修改</button>
+                    <button class="btn btn-primary" onclick="approveFinal()">确认定稿</button>
+                </div>
+                <div class="status-line" id="statusLine"></div>
+            </div>
+        </section>
+    </main>
 </div>
 
-<div class="modal-overlay" id="finalModal">
-    <div class="modal-content">
-        <h2>自传草稿</h2>
-        <pre id="finalContent"></pre>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
-            <button class="btn ghost" onclick="closeFinalModal()">关闭</button>
-            <button class="btn ghost" onclick="reviseDraft()">我想修改</button>
-            <button class="btn primary" onclick="approveFinal()">确认定稿</button>
+<div class="modal" id="altModal" onclick="onBackdropClose(event, 'altModal')">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="altModalTitle">
+        <h2 id="altModalTitle">替代提交</h2>
+        <p class="sheet-sub">可提交音频/视频链接，或直接粘贴转写文本。系统会将转写并入访谈材料。</p>
+        <div class="form-grid">
+            <label>
+                提交类型
+                <select id="altType">
+                    <option value="audio">audio</option>
+                    <option value="video">video</option>
+                    <option value="text_document">text_document</option>
+                </select>
+            </label>
+            <label>
+                链接（可选）
+                <input class="field" id="altUrl" placeholder="https://..." />
+            </label>
+            <label>
+                转写文本（建议）
+                <textarea class="field" id="altTranscript" rows="6" placeholder="粘贴音频/视频转写文本"></textarea>
+            </label>
+            <label>
+                补充说明（可选）
+                <textarea class="field" id="altNote" rows="3" placeholder="例如：这是昨晚口述的学习回顾"></textarea>
+            </label>
+        </div>
+        <div class="sheet-actions">
+            <button class="btn btn-plain" onclick="closeAltModal()">取消</button>
+            <button class="btn btn-primary" id="altSubmitBtn" onclick="submitAlternative()">提交替代材料</button>
         </div>
     </div>
 </div>
 
-<script>
-    const STAGES = ["consent_pending", "daily", "evolution", "experience", "difficulty", "impact", "wrapup", "review", "done", "withdrawn"];
-    const CHAT_STAGES = ["daily", "evolution", "experience", "difficulty", "impact", "wrapup"];
-    const STAGE_NAMES = {
-        "consent_pending": "同意",
-        "daily": "日常",
-        "evolution": "演变",
-        "experience": "体验",
-        "difficulty": "困难",
-        "impact": "影响",
-        "wrapup": "补漏",
-        "review": "审阅",
-        "done": "完成",
-        "withdrawn": "撤回"
-    };
+<div class="modal" id="draftModal" onclick="onBackdropClose(event, 'draftModal')">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="draftModalTitle">
+        <h2 id="draftModalTitle">自传草稿</h2>
+        <p class="sheet-sub">先审阅草稿，再通过“继续修改”给出定向修改指令。</p>
+        <pre id="draftContent">尚未生成草稿。</pre>
+        <div class="form-grid">
+            <label>
+                修改指令
+                <textarea class="field" id="reviseInstruction" rows="3" placeholder="例如：减少概括，增加职场阶段的具体事件与情绪细节"></textarea>
+            </label>
+        </div>
+        <div class="sheet-actions">
+            <button class="btn btn-plain" onclick="closeDraftModal()">关闭</button>
+            <button class="btn btn-secondary" id="reviseBtn" onclick="reviseDraft()">继续修改草稿</button>
+            <button class="btn btn-primary" id="approveBtn" onclick="approveFinal()">确认定稿</button>
+        </div>
+    </div>
+</div>
 
-    const msgContainer = document.getElementById("messages");
-    const sendBtn = document.getElementById("sendBtn");
-    const userInput = document.getElementById("userInput");
-    const stageList = document.getElementById("stageList");
-    const finalizeBtn = document.getElementById("finalizeBtn");
-    const skipBtn = document.getElementById("skipBtn");
-    const withdrawBtn = document.getElementById("withdrawBtn");
-    const altBtn = document.getElementById("altBtn");
-    const consentPanel = document.getElementById("consentPanel");
-    const reviewControls = document.getElementById("reviewControls");
-    const statusLine = document.getElementById("statusLine");
+<div class="toast" id="toast"></div>
 
-    let currentToken = localStorage.getItem("interview_token");
-    let currentStage = "";
-    let isGenerating = false;
-
-    function stageIndex(stage) {
-        const i = STAGES.indexOf(stage);
-        return i < 0 ? 0 : i;
-    }
-
-    function setGenerating(state) {
-        isGenerating = state;
-        sendBtn.disabled = state || !CHAT_STAGES.includes(currentStage);
-        userInput.disabled = state || !CHAT_STAGES.includes(currentStage);
-        userInput.placeholder = state ? "AI 正在生成下一问..." : "输入你的回答...";
-        skipBtn.disabled = state || !CHAT_STAGES.includes(currentStage);
-        altBtn.disabled = state || !CHAT_STAGES.includes(currentStage);
-        finalizeBtn.disabled = state || !(currentStage === "wrapup" || currentStage === "review");
-        withdrawBtn.disabled = state || !currentToken || currentStage === "withdrawn";
-    }
-
-    function appendMessage(role, content, animated = true) {
-        const el = document.createElement("div");
-        el.className = `message ${role}`;
-        if (!animated) el.style.animation = "none";
-        el.textContent = content;
-        msgContainer.appendChild(el);
-        msgContainer.scrollTop = msgContainer.scrollHeight;
-        return el;
-    }
-
-    function renderStages(activeStage) {
-        const visible = ["consent_pending", "daily", "evolution", "experience", "difficulty", "impact", "wrapup", "review", "done"];
-        stageList.innerHTML = visible.map((s, idx) => {
-            let className = "step";
-            const activeIdx = visible.indexOf(activeStage);
-            if (s === activeStage) className += " active";
-            if (activeIdx >= 0 && idx < activeIdx) className += " completed";
-            if (activeStage === "withdrawn" && idx >= 1) className += " alert";
-            return `<li class="${className}"><div class="step-dot">${idx + 1}</div><div class="step-name">${STAGE_NAMES[s] || s}</div></li>`;
-        }).join("");
-    }
-
-    function setStatus(text) {
-        statusLine.textContent = text || "";
-    }
-
-    function syncUiByStage() {
-        consentPanel.classList.toggle("visible", currentStage === "consent_pending");
-        reviewControls.classList.toggle("visible", currentStage === "review" || currentStage === "done");
-
-        if (currentStage === "done") {
-            setStatus("已定稿完成。若需撤回或继续修改，仍可操作。");
-        } else if (currentStage === "withdrawn") {
-            setStatus("访谈已撤回。此 token 不再继续访谈。");
-        } else if (currentStage === "review") {
-            setStatus("当前处于草稿审阅阶段：可继续修改，满意后确认定稿。");
-        } else if (currentStage === "consent_pending") {
-            setStatus("请先确认是否同意参与访谈。");
-        } else {
-            setStatus("你可以跳过问题，或使用替代提交（音频/视频转写）。");
-        }
-
-        setGenerating(false);
-    }
-
-    function parseErrorDetail(detail) {
-        if (!detail) return "请求失败";
-        if (typeof detail === "string") return detail;
-        if (detail.message && detail.missing_requirements) {
-            return `${detail.message}\n- ${detail.missing_requirements.join("\n- ")}`;
-        }
-        try { return JSON.stringify(detail, null, 2); } catch { return "请求失败"; }
-    }
-
-    async function refreshState(fullRefresh = false) {
-        if (!currentToken) {
-            msgContainer.innerHTML = "";
-            appendMessage("assistant", "你好，点击“开启新访谈”开始。", false);
-            currentStage = "consent_pending";
-            renderStages(currentStage);
-            syncUiByStage();
-            return;
-        }
-
-        try {
-            const res = await fetch(`/export?token=${currentToken}`);
-            if (!res.ok) {
-                localStorage.removeItem("interview_token");
-                currentToken = "";
-                msgContainer.innerHTML = "";
-                appendMessage("system", "访谈 token 无效或已失效，请重新开启。", false);
-                return refreshState(true);
-            }
-
-            const data = await res.json();
-            if (fullRefresh) {
-                msgContainer.innerHTML = "";
-                data.messages.forEach((m) => appendMessage(m.role, m.content, false));
-            }
-
-            currentStage = data.interview.stage;
-            renderStages(currentStage);
-            syncUiByStage();
-        } catch (err) {
-            console.error(err);
-            appendMessage("system", "状态刷新失败，请稍后重试。", true);
-        }
-    }
-
-    async function startNewInterview() {
-        if (isGenerating) return;
-        if (currentToken && !confirm("开始新访谈会替换当前 token，是否继续？")) return;
-
-        setGenerating(true);
-        try {
-            const res = await fetch("/interviews", { method: "POST" });
-            const data = await res.json();
-            currentToken = data.token;
-            localStorage.setItem("interview_token", currentToken);
-            await refreshState(true);
-        } catch (err) {
-            console.error(err);
-            appendMessage("system", "开启新访谈失败。", true);
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function handleConsent(agreed) {
-        if (!currentToken || isGenerating) return;
-        setGenerating(true);
-        try {
-            const res = await fetch("/consent", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, agreed })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                alert(parseErrorDetail(data.detail));
-                return;
-            }
-            await refreshState(true);
-        } catch (err) {
-            console.error(err);
-            alert("提交同意状态失败。");
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function sendMessage() {
-        if (isGenerating || !currentToken || !CHAT_STAGES.includes(currentStage)) return;
-        const content = userInput.value.trim();
-        if (!content) return;
-
-        setGenerating(true);
-        userInput.value = "";
-        appendMessage("user", content, true);
-        const typing = appendMessage("assistant", "正在输入", true);
-        typing.classList.add("typing");
-
-        try {
-            const m = await fetch("/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, content })
-            });
-            const mData = await m.json();
-            if (!m.ok) throw new Error(parseErrorDetail(mData.detail));
-
-            const n = await fetch(`/next?token=${currentToken}`, { method: "POST" });
-            const nData = await n.json();
-            if (!n.ok) throw new Error(parseErrorDetail(nData.detail));
-
-            typing.remove();
-            appendMessage("assistant", nData.questions.join("\n"), true);
-            if (nData.rights_notice) appendMessage("system", nData.rights_notice, true);
-
-            currentStage = nData.should_advance_stage ? nData.suggested_next_stage : nData.stage;
-            renderStages(currentStage);
-            syncUiByStage();
-        } catch (err) {
-            console.error(err);
-            typing.remove();
-            appendMessage("system", String(err.message || err), true);
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function skipQuestion() {
-        if (isGenerating || !currentToken || !CHAT_STAGES.includes(currentStage)) return;
-        const reason = prompt("可选：为什么想跳过这题？（可留空）") || "";
-
-        setGenerating(true);
-        const typing = appendMessage("assistant", "正在生成下一问", true);
-        typing.classList.add("typing");
-
-        try {
-            const res = await fetch("/skip", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, reason })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(parseErrorDetail(data.detail));
-
-            typing.remove();
-            appendMessage("assistant", data.questions.join("\n"), true);
-            if (data.rights_notice) appendMessage("system", data.rights_notice, true);
-
-            currentStage = data.should_advance_stage ? data.suggested_next_stage : data.stage;
-            renderStages(currentStage);
-            syncUiByStage();
-        } catch (err) {
-            console.error(err);
-            typing.remove();
-            appendMessage("system", String(err.message || err), true);
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function withdrawInterview() {
-        if (!currentToken || isGenerating) return;
-        if (!confirm("撤回后该访谈会停止，是否继续？")) return;
-
-        setGenerating(true);
-        try {
-            const reason = prompt("可选：撤回原因（可留空）") || "";
-            const res = await fetch("/withdraw", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, reason })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(parseErrorDetail(data.detail));
-
-            await refreshState(true);
-        } catch (err) {
-            console.error(err);
-            appendMessage("system", String(err.message || err), true);
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function submitAlternative() {
-        if (!currentToken || isGenerating) return;
-        const submission_type = prompt("请输入提交类型：audio / video / text_document", "audio");
-        if (!submission_type) return;
-        const url = prompt("可选：粘贴音频/视频链接（可留空）", "") || "";
-        const transcript = prompt("可选：粘贴转写文本（建议提供）", "") || "";
-        const note = prompt("可选：补充说明", "") || "";
-
-        setGenerating(true);
-        try {
-            const res = await fetch("/alternative-submissions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, submission_type, url, transcript, note })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(parseErrorDetail(data.detail));
-
-            appendMessage("system", "替代提交已记录。若提供了转写，将并入访谈材料。", true);
-            await refreshState(true);
-        } catch (err) {
-            console.error(err);
-            appendMessage("system", String(err.message || err), true);
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function finalizeInterview(force = false) {
-        if (!currentToken || isGenerating) return;
-        if (!(currentStage === "wrapup" || currentStage === "review")) {
-            alert("当前阶段不可生成草稿，请先完成访谈。")
-            return;
-        }
-
-        setGenerating(true);
-        finalizeBtn.textContent = "生成中...";
-
-        try {
-            const res = await fetch("/finalize", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, force })
-            });
-            const data = await res.json();
-
-            if (!res.ok) {
-                if (!force && data.detail && data.detail.missing_requirements) {
-                    const msg = parseErrorDetail(data.detail);
-                    if (confirm(`${msg}\n\n是否忽略门禁直接生成？`)) {
-                        return finalizeInterview(true);
-                    }
-                    return;
-                }
-                throw new Error(parseErrorDetail(data.detail));
-            }
-
-            document.getElementById("finalContent").textContent = data.content;
-            document.getElementById("finalModal").classList.add("visible");
-            await refreshState();
-        } catch (err) {
-            console.error(err);
-            alert(String(err.message || err));
-        } finally {
-            finalizeBtn.textContent = "生成草稿";
-            setGenerating(false);
-        }
-    }
-
-    async function reviseDraft() {
-        if (!currentToken || isGenerating) return;
-        const instruction = prompt("请输入你希望修改的方向（例如：减少说教感、补充职场阶段细节、删去某段敏感信息）");
-        if (!instruction) return;
-
-        setGenerating(true);
-        try {
-            const res = await fetch("/revise-final", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken, instruction })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(parseErrorDetail(data.detail));
-
-            document.getElementById("finalContent").textContent = data.content;
-            document.getElementById("finalModal").classList.add("visible");
-            await refreshState();
-        } catch (err) {
-            console.error(err);
-            alert(String(err.message || err));
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    async function approveFinal() {
-        if (!currentToken || isGenerating) return;
-        if (!confirm("确认将当前草稿定稿吗？")) return;
-
-        setGenerating(true);
-        try {
-            const res = await fetch("/approve-final", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: currentToken })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(parseErrorDetail(data.detail));
-            await refreshState();
-            alert("已定稿。")
-        } catch (err) {
-            console.error(err);
-            alert(String(err.message || err));
-        } finally {
-            setGenerating(false);
-        }
-    }
-
-    function closeFinalModal() {
-        document.getElementById("finalModal").classList.remove("visible");
-    }
-
-    (() => {
-        refreshState(true);
-    })();
-</script>
+<script src="/static/app.js" defer></script>
 </body>
 </html>
