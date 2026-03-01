@@ -16,11 +16,16 @@ from pydantic import BaseModel
 
 load_dotenv()
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+ARK_BASE_URL = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
+ARK_API_KEY = os.environ.get("ARK_API_KEY") or os.environ.get("OPENAI_API_KEY")
+if not ARK_API_KEY:
+    raise RuntimeError("Missing ARK_API_KEY (or OPENAI_API_KEY fallback) in environment")
+
+client = OpenAI(base_url=ARK_BASE_URL, api_key=ARK_API_KEY)
 
 DB_PATH = os.environ.get("DB_PATH", "./interviews.db")
-MODEL_ORCH = os.environ.get("MODEL_ORCH", "gpt-4o-mini")
-MODEL_WRITE = os.environ.get("MODEL_WRITE", "gpt-4o-mini")
+MODEL_ORCH = os.environ.get("MODEL_ORCH", "doubao-seed-2-0-lite-260215")
+MODEL_WRITE = os.environ.get("MODEL_WRITE", "doubao-seed-2-0-lite-260215")
 
 ACTIVE_STAGES = ["daily", "evolution", "experience", "difficulty", "impact", "wrapup"]
 ALL_STAGES = ["consent_pending", *ACTIVE_STAGES, "review", "done", "withdrawn"]
@@ -411,6 +416,116 @@ ORCH_SCHEMA: Dict[str, Any] = {
 }
 
 
+def _obj_get(obj: Any, key: str, default: Any = None) -> Any:
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
+def _extract_text_from_response(resp: Any) -> str:
+    # Responses API happy-path
+    output_text = _obj_get(resp, "output_text")
+    if isinstance(output_text, str) and output_text.strip():
+        return output_text.strip()
+
+    # Chat Completions fallback
+    choices = _obj_get(resp, "choices", [])
+    if choices:
+        msg = _obj_get(choices[0], "message", {})
+        content = _obj_get(msg, "content")
+        if isinstance(content, str) and content.strip():
+            return content.strip()
+
+    # Generic fallback for provider variants
+    output = _obj_get(resp, "output", []) or []
+    chunks: List[str] = []
+    for item in output:
+        for part in _obj_get(item, "content", []) or []:
+            text = _obj_get(part, "text")
+            if isinstance(text, str) and text.strip():
+                chunks.append(text.strip())
+    if chunks:
+        return "\n".join(chunks).strip()
+
+    return ""
+
+
+def _parse_json_text(text: str) -> Dict[str, Any]:
+    raw = (text or "").strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+
+    try:
+        data = json.loads(raw)
+    except Exception:
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start == -1 or end == -1 or end <= start:
+            raise
+        data = json.loads(raw[start : end + 1])
+
+    if not isinstance(data, dict):
+        raise RuntimeError("Expected JSON object from model output")
+    return data
+
+
+def _llm_text(
+    model: str,
+    system_prompt: str,
+    user_text: str,
+    json_schema: Optional[Dict[str, Any]] = None,
+) -> str:
+    # Primary: use Responses API (matches Ark / Doubao OpenAI-compatible examples).
+    try:
+        request: Dict[str, Any] = {
+            "model": model,
+            "input": [
+                {
+                    "role": "system",
+                    "content": [{"type": "input_text", "text": system_prompt}],
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": user_text}],
+                },
+            ],
+        }
+        if json_schema:
+            request["text"] = {
+                "format": {
+                    "type": "json_schema",
+                    "name": json_schema["name"],
+                    "schema": json_schema["schema"],
+                    "strict": bool(json_schema.get("strict", True)),
+                }
+            }
+
+        resp = client.responses.create(**request)
+        text = _extract_text_from_response(resp)
+        if text:
+            return text
+    except Exception:
+        # Fallback for providers that only support chat.completions.
+        pass
+
+    request = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text},
+        ],
+    }
+    if json_schema:
+        request["response_format"] = {"type": "json_schema", "json_schema": json_schema}
+
+    resp = client.chat.completions.create(**request)
+    text = _extract_text_from_response(resp)
+    if not text:
+        raise RuntimeError("Empty model output")
+    return text
+
+
 def orchestrate_next(stage: str, recent_msgs: List[Dict[str, str]], memory: Dict[str, Any], progress: Dict[str, Any]) -> Dict[str, Any]:
     payload = {
         "stage": stage,
@@ -419,20 +534,13 @@ def orchestrate_next(stage: str, recent_msgs: List[Dict[str, str]], memory: Dict
         "stage_requirements": STAGE_REQUIREMENTS.get(stage, []),
         "recent_messages": recent_msgs,
     }
-
-    resp = client.chat.completions.create(
+    text = _llm_text(
         model=MODEL_ORCH,
-        messages=[
-            {"role": "system", "content": ORCH_SYSTEM},
-            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
-        ],
-        response_format={"type": "json_schema", "json_schema": ORCH_SCHEMA},
+        system_prompt=ORCH_SYSTEM,
+        user_text=json.dumps(payload, ensure_ascii=False),
+        json_schema=ORCH_SCHEMA,
     )
-
-    text = resp.choices[0].message.content
-    if not text:
-        raise RuntimeError("LLM orchestrator returned empty content")
-    return json.loads(text)
+    return _parse_json_text(text)
 
 
 def synthesize_autobiography(memory: Dict[str, Any], progress: Dict[str, Any], excerpts: List[str], revision_note: str = "") -> str:
@@ -443,18 +551,12 @@ def synthesize_autobiography(memory: Dict[str, Any], progress: Dict[str, Any], e
         "revision_note": revision_note,
     }
 
-    resp = client.chat.completions.create(
+    text = _llm_text(
         model=MODEL_WRITE,
-        messages=[
-            {"role": "system", "content": WRITE_SYSTEM},
-            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
-        ],
+        system_prompt=WRITE_SYSTEM,
+        user_text=json.dumps(payload, ensure_ascii=False),
     )
-
-    text = resp.choices[0].message.content
-    if not text:
-        raise RuntimeError("LLM writer returned empty content")
-    return text
+    return text.strip()
 
 
 # -----------------------------

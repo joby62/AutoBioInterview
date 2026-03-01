@@ -7,124 +7,109 @@
     <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-<div class="ambient"></div>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+<canvas id="celebrateCanvas" aria-hidden="true"></canvas>
 
 <div class="app-shell">
-    <aside class="left-panel">
-        <section class="brand-card">
-            <span class="brand-tag">Autobiography Lab</span>
-            <h1 class="brand-title">数字学习自传</h1>
-            <p class="brand-subtitle">通过连续、具体的故事追问，帮助受访者生成可用的研究自传文本。</p>
-        </section>
-
-        <section class="stage-card">
-            <h3 class="card-title">访谈进度</h3>
-            <div class="stage-rail" id="stageRail"></div>
-        </section>
-
-        <section class="guide-card">
-            <h2 class="guide-title" id="guideTitle">访谈引导</h2>
-            <p class="guide-desc" id="guideDesc"></p>
-            <ul class="guide-list" id="guideList"></ul>
-            <div class="guide-examples" id="guideExamples"></div>
-        </section>
-
-        <section class="rights-card">
-            <h3 class="card-title">参与者权益</h3>
-            <ul class="rights-list">
-                <li>可跳过任何问题，不需要解释。</li>
-                <li>可随时撤回访谈。</li>
-                <li>可上传替代材料（音频/视频转写）。</li>
-                <li>生成草稿后可继续修改再定稿。</li>
-                <li>系统会对敏感信息做匿名化处理。</li>
-            </ul>
-        </section>
-    </aside>
-
-    <main class="main-panel">
-        <header class="topbar">
-            <div>
-                <h2 class="topbar-title">访谈控制台</h2>
-                <p class="topbar-sub">像聊天一样完成访谈，重点是“具体场景 + 真实感受 + 关键变化”。</p>
-                <div class="meta-row">
-                    <span class="pill stage" id="stageBadge" data-stage="consent_pending">待同意</span>
+    <header class="hero-card glass" id="heroCard">
+        <div class="hero-main">
+            <div class="hero-copy">
+                <p class="hero-kicker">Digital Learning Interview</p>
+                <h1>把“写问卷”变成一场有趣的自传对话</h1>
+                <p class="hero-sub">回答越具体，生成的自传越真实。你可以随时跳过、撤回或继续修改草稿。</p>
+                <div class="hero-meta">
+                    <span class="pill pill-stage" id="stageBadge" data-stage="consent_pending">待同意</span>
                     <span class="pill" id="tokenBadge">未开始</span>
                     <span class="pill" id="statsBadge">暂无记录</span>
                 </div>
             </div>
-            <div class="topbar-actions">
-                <button class="btn btn-plain theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">切换主题</button>
-                <button class="btn btn-brand" id="newInterviewBtn" onclick="startNewInterview()">开启新访谈</button>
+            <div class="hero-actions">
+                <button class="btn btn-primary" id="newInterviewBtn" onclick="startNewInterview()">开启新访谈</button>
                 <button class="btn btn-danger" id="withdrawBtn" onclick="withdrawInterview()">撤回访谈</button>
             </div>
-        </header>
-
-        <section class="consent-strip" id="consentStrip">
-            <h3 class="consent-title">请先确认知情同意</h3>
-            <p class="consent-copy">
-                本访谈用于博士研究，内容将匿名化处理。你有权拒答、跳过、暂停或撤回。若不便文字输入，可使用替代提交。
-            </p>
-            <div class="consent-actions">
-                <button class="btn btn-primary" id="consentAgreeBtn" onclick="handleConsent(true)">我同意并开始</button>
-                <button class="btn btn-plain" id="consentRejectBtn" onclick="handleConsent(false)">不同意参与</button>
+        </div>
+        <div class="progress-zone">
+            <div class="progress-track" id="progressTrack"></div>
+            <div class="ring-box">
+                <svg viewBox="0 0 120 120" class="ring-svg" aria-hidden="true">
+                    <circle cx="60" cy="60" r="48" class="ring-bg"></circle>
+                    <circle cx="60" cy="60" r="48" class="ring-fg" id="progressRingStroke"></circle>
+                </svg>
+                <div class="ring-text" id="progressRingText">0%</div>
             </div>
-        </section>
+        </div>
+    </header>
 
-        <section class="messages-wrap">
-            <div class="messages" id="messages"></div>
-        </section>
+    <section class="guide-card glass">
+        <div class="guide-head">
+            <div>
+                <h2 id="guideTitle">访谈引导</h2>
+                <p id="guideDesc"></p>
+            </div>
+            <button class="btn btn-plain" id="shuffleSparkBtn" onclick="shuffleSparks()">换一组灵感</button>
+        </div>
+        <div class="chip-row" id="quickChips"></div>
+    </section>
 
-        <section class="composer">
-            <div class="quick-chip-row" id="quickChips"></div>
+    <section class="consent-card glass" id="consentCard">
+        <h3>请先确认知情同意</h3>
+        <p>内容仅用于研究，发布时会匿名化。你可拒答、跳过、暂停、撤回，也可通过音频/视频转写补充材料。</p>
+        <div class="consent-actions">
+            <button class="btn btn-primary" id="consentAgreeBtn" onclick="handleConsent(true)">我同意并开始</button>
+            <button class="btn btn-plain" id="consentRejectBtn" onclick="handleConsent(false)">不同意参与</button>
+        </div>
+    </section>
+
+    <section class="chat-card glass">
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+            <div class="composer-meta">
+                <span id="wordCounter">0 字</span>
+                <span id="statusLine">准备开始</span>
+            </div>
             <div class="composer-row">
-                <textarea id="userInput" placeholder="输入你的回答（回车发送，Shift+回车换行）" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"></textarea>
-                <button class="circle-btn" id="sendBtn" onclick="sendMessage()" title="发送">
+                <textarea id="userInput" placeholder="输入你的回答（回车发送，Shift+回车换行）" onkeydown="handleInputKey(event)"></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="发送">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
                     </svg>
                 </button>
             </div>
             <div class="action-row">
-                <div class="action-left">
-                    <button class="btn btn-warning" id="skipBtn" onclick="skipQuestion()">跳过本题</button>
-                    <button class="btn btn-secondary" id="altBtn" onclick="openAltModal()">替代提交</button>
-                    <button class="btn btn-primary" id="finalizeBtn" onclick="finalizeInterview()">生成草稿</button>
-                </div>
-                <div class="action-right review-actions" id="reviewActions">
-                    <button class="btn btn-secondary" onclick="openDraftModal()">查看草稿</button>
-                    <button class="btn btn-secondary" onclick="focusRevisionInput()">继续修改</button>
+                <button class="btn btn-warning" id="skipBtn" onclick="skipQuestion()">跳过本题</button>
+                <button class="btn btn-plain" id="altBtn" onclick="openAltModal()">替代提交</button>
+                <button class="btn btn-secondary" id="finalizeBtn" onclick="finalizeInterview()">生成草稿</button>
+                <div class="review-actions" id="reviewActions">
+                    <button class="btn btn-plain" onclick="openDraftModal()">查看草稿</button>
+                    <button class="btn btn-plain" onclick="focusRevisionInput()">继续修改</button>
                     <button class="btn btn-primary" onclick="approveFinal()">确认定稿</button>
                 </div>
-                <div class="status-line" id="statusLine"></div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 </div>
 
 <div class="modal" id="altModal" onclick="onBackdropClose(event, 'altModal')">
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="altModalTitle">
         <h2 id="altModalTitle">替代提交</h2>
-        <p class="sheet-sub">可提交音频/视频链接，或直接粘贴转写文本。系统会将转写并入访谈材料。</p>
+        <p class="sheet-sub">你可以贴链接，也可以直接粘贴转写文本。</p>
         <div class="form-grid">
-            <label>
-                提交类型
+            <label>提交类型
                 <select id="altType">
                     <option value="audio">audio</option>
                     <option value="video">video</option>
                     <option value="text_document">text_document</option>
                 </select>
             </label>
-            <label>
-                链接（可选）
+            <label>链接（可选）
                 <input class="field" id="altUrl" placeholder="https://..." />
             </label>
-            <label>
-                转写文本（建议）
-                <textarea class="field" id="altTranscript" rows="6" placeholder="粘贴音频/视频转写文本"></textarea>
+            <label>转写文本（建议）
+                <textarea class="field" id="altTranscript" rows="6" placeholder="粘贴音频或视频的转写内容"></textarea>
             </label>
-            <label>
-                补充说明（可选）
-                <textarea class="field" id="altNote" rows="3" placeholder="例如：这是昨晚口述的学习回顾"></textarea>
+            <label>补充说明（可选）
+                <textarea class="field" id="altNote" rows="3" placeholder="例如：这是昨晚散步时录的口述"></textarea>
             </label>
         </div>
         <div class="sheet-actions">
@@ -137,17 +122,16 @@
 <div class="modal" id="draftModal" onclick="onBackdropClose(event, 'draftModal')">
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="draftModalTitle">
         <h2 id="draftModalTitle">自传草稿</h2>
-        <p class="sheet-sub">先审阅草稿，再通过“继续修改”给出定向修改指令。</p>
+        <p class="sheet-sub">先通读草稿，再给修改指令，满意后再定稿。</p>
         <pre id="draftContent">尚未生成草稿。</pre>
         <div class="form-grid">
-            <label>
-                修改指令
-                <textarea class="field" id="reviseInstruction" rows="3" placeholder="例如：减少概括，增加职场阶段的具体事件与情绪细节"></textarea>
+            <label>修改指令
+                <textarea class="field" id="reviseInstruction" rows="3" placeholder="例如：减少概括，补充职场阶段具体细节和感受"></textarea>
             </label>
         </div>
         <div class="sheet-actions">
             <button class="btn btn-plain" onclick="closeDraftModal()">关闭</button>
-            <button class="btn btn-secondary" id="reviseBtn" onclick="reviseDraft()">继续修改草稿</button>
+            <button class="btn btn-plain" id="reviseBtn" onclick="reviseDraft()">继续修改草稿</button>
             <button class="btn btn-primary" id="approveBtn" onclick="approveFinal()">确认定稿</button>
         </div>
     </div>
