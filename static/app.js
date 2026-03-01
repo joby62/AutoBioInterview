@@ -148,7 +148,28 @@ const STAGE_GUIDE = {
 
 const TOKEN_KEY = "interview_token";
 const SPEED_PREF_KEY = "thinking_speed_mode";
+const FAB_POS_KEY = "progress_fab_pos_v1";
 const DEFAULT_MODELS = ["doubao-seed-2-0-mini-260215", "doubao-seed-2-0-lite-260215"];
+const FAB_SIZE = 56;
+const FAB_MARGIN = 12;
+
+const STAGE_MIN_ANSWER_COUNT = {
+    daily: 2,
+    evolution: 2,
+    experience: 2,
+    difficulty: 2,
+    impact: 2,
+    wrapup: 1
+};
+
+const STAGE_MIN_ANSWER_CHARS = {
+    daily: 40,
+    evolution: 50,
+    experience: 50,
+    difficulty: 50,
+    impact: 50,
+    wrapup: 20
+};
 
 function safeStorageRead(key, fallback = "") {
     try {
@@ -193,7 +214,16 @@ const state = {
     stageReady: false,
     stageMissing: [],
     progressPanelVisible: false,
-    progressPanelTimer: null
+    progressPanelTimer: null,
+    progressHoverDepth: 0,
+    progressPointerId: null,
+    progressDragOffsetX: 0,
+    progressDragOffsetY: 0,
+    progressFabMoved: false,
+    progressLastDragAt: 0,
+    progressLastInteractionAt: 0,
+    fabX: null,
+    fabY: null
 };
 
 const els = {
@@ -352,6 +382,90 @@ function rangeText(low, high) {
     const a = Math.max(0, Math.round(low));
     const b = Math.max(a, Math.round(high));
     return `${a}-${b} min`;
+}
+
+function markProgressInteraction() {
+    state.progressLastInteractionAt = Date.now();
+}
+
+function adaptivePanelHideDelay(reason = "leave") {
+    if (reason === "stage_complete") return 5200;
+
+    let delay = 760;
+    const now = Date.now();
+    if (now - state.progressLastInteractionAt < 1600) delay += 220;
+    if (now - state.progressLastDragAt < 1800) delay += 340;
+    if (state.isBusy) delay += 180;
+    return clamp(delay, 700, 1600);
+}
+
+function saveFabPosition() {
+    safeStorageWrite(FAB_POS_KEY, JSON.stringify({ x: state.fabX, y: state.fabY }));
+}
+
+function loadFabPosition() {
+    const raw = safeStorageRead(FAB_POS_KEY, "");
+    if (!raw) return;
+    try {
+        const pos = JSON.parse(raw);
+        if (Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+            state.fabX = pos.x;
+            state.fabY = pos.y;
+        }
+    } catch {
+        // noop
+    }
+}
+
+function fabSizePx() {
+    return Math.max(44, els.progressFab.offsetWidth || FAB_SIZE);
+}
+
+function applyFabPosition() {
+    const size = fabSizePx();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const maxX = Math.max(FAB_MARGIN, vw - size - FAB_MARGIN);
+    const maxY = Math.max(FAB_MARGIN, vh - size - FAB_MARGIN);
+
+    if (!Number.isFinite(state.fabX) || !Number.isFinite(state.fabY)) {
+        state.fabX = maxX;
+        state.fabY = maxY;
+    }
+
+    state.fabX = clamp(state.fabX, FAB_MARGIN, maxX);
+    state.fabY = clamp(state.fabY, FAB_MARGIN, maxY);
+
+    els.progressFab.style.left = `${state.fabX}px`;
+    els.progressFab.style.top = `${state.fabY}px`;
+    els.progressFab.style.right = "auto";
+    els.progressFab.style.bottom = "auto";
+    placeProgressPanelNearFab();
+}
+
+function placeProgressPanelNearFab() {
+    const panel = els.progressPanel;
+    const panelRect = panel.getBoundingClientRect();
+    const panelWidth = panelRect.width || Math.min(700, window.innerWidth - 28);
+    const panelHeight = panelRect.height || 240;
+    const size = fabSizePx();
+    const margin = 10;
+    const anchorX = (state.fabX ?? 0) + size * 0.5;
+    const anchorY = (state.fabY ?? 0) + size * 0.5;
+
+    let left = anchorX - panelWidth + size * 0.55;
+    let top = anchorY - panelHeight - size * 0.6;
+
+    left = clamp(left, margin, Math.max(margin, window.innerWidth - panelWidth - margin));
+    if (top < margin) {
+        top = anchorY + size * 0.6;
+    }
+    top = clamp(top, margin, Math.max(margin, window.innerHeight - panelHeight - margin));
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
 }
 
 function parseIsoTimeMs(value) {
@@ -570,6 +684,8 @@ function renderProgressSummary() {
         const p = Math.round(completion * 100);
         els.progressStageEta.textContent = `本阶段预计还需 ${rangeText(stageLow, stageHigh)}（当前完成度约 ${p}%）。`;
     }
+
+    placeProgressPanelNearFab();
 }
 
 function renderHeaderMeta() {
@@ -636,6 +752,7 @@ function confirmIntroAndClose() {
 
 function syncProgressPanel() {
     els.progressPanel.classList.toggle("visible", state.progressPanelVisible);
+    placeProgressPanelNearFab();
 }
 
 function clearProgressPanelTimer() {
@@ -645,16 +762,25 @@ function clearProgressPanelTimer() {
     }
 }
 
-function showProgressPanel(autoHideMs = 0) {
+function scheduleProgressPanelHide(delayMs, reason = "leave") {
+    clearProgressPanelTimer();
+    const delay = Number.isFinite(delayMs) ? delayMs : adaptivePanelHideDelay(reason);
+    state.progressPanelTimer = setTimeout(() => {
+        if (state.progressHoverDepth > 0) return;
+        state.progressPanelVisible = false;
+        syncProgressPanel();
+    }, delay);
+}
+
+function showProgressPanel(autoHideMs = null, reason = "hover") {
     clearProgressPanelTimer();
     state.progressPanelVisible = true;
     syncProgressPanel();
-    if (autoHideMs > 0) {
-        state.progressPanelTimer = setTimeout(() => {
-            state.progressPanelVisible = false;
-            syncProgressPanel();
-        }, autoHideMs);
+    if (autoHideMs !== null) {
+        if (autoHideMs > 0) scheduleProgressPanelHide(autoHideMs, reason);
+        return;
     }
+    scheduleProgressPanelHide(undefined, reason);
 }
 
 function hideProgressPanel() {
@@ -664,10 +790,66 @@ function hideProgressPanel() {
 }
 
 function toggleProgressPanel() {
+    markProgressInteraction();
+    if (state.progressFabMoved) {
+        state.progressFabMoved = false;
+        return;
+    }
     if (state.progressPanelVisible) {
         hideProgressPanel();
-    } else {
-        showProgressPanel();
+        return;
+    }
+    showProgressPanel();
+}
+
+function onProgressHoverEnter() {
+    state.progressHoverDepth += 1;
+    markProgressInteraction();
+    showProgressPanel(null, "hover");
+}
+
+function onProgressHoverLeave() {
+    state.progressHoverDepth = Math.max(0, state.progressHoverDepth - 1);
+    if (state.progressHoverDepth > 0) return;
+    scheduleProgressPanelHide(undefined, "leave");
+}
+
+function startFabDrag(event) {
+    if (event.button !== 0 && event.pointerType !== "touch") return;
+    const rect = els.progressFab.getBoundingClientRect();
+    state.progressPointerId = event.pointerId;
+    state.progressDragOffsetX = event.clientX - rect.left;
+    state.progressDragOffsetY = event.clientY - rect.top;
+    state.progressFabMoved = false;
+    markProgressInteraction();
+    clearProgressPanelTimer();
+    els.progressFab.setPointerCapture(event.pointerId);
+}
+
+function onFabDragMove(event) {
+    if (state.progressPointerId !== event.pointerId) return;
+    const size = fabSizePx();
+    const nextX = event.clientX - state.progressDragOffsetX;
+    const nextY = event.clientY - state.progressDragOffsetY;
+
+    if (Math.abs(nextX - (state.fabX || 0)) > 1 || Math.abs(nextY - (state.fabY || 0)) > 1) {
+        state.progressFabMoved = true;
+    }
+
+    state.fabX = clamp(nextX, FAB_MARGIN, Math.max(FAB_MARGIN, window.innerWidth - size - FAB_MARGIN));
+    state.fabY = clamp(nextY, FAB_MARGIN, Math.max(FAB_MARGIN, window.innerHeight - size - FAB_MARGIN));
+    applyFabPosition();
+}
+
+function endFabDrag(event) {
+    if (state.progressPointerId !== event.pointerId) return;
+    state.progressPointerId = null;
+    state.progressLastDragAt = Date.now();
+    saveFabPosition();
+
+    if (state.progressFabMoved) {
+        showProgressPanel(0, "drag");
+        scheduleProgressPanelHide(undefined, "after_drag");
     }
 }
 
@@ -825,6 +1007,19 @@ function isCountedUserAnswer(msg) {
     return true;
 }
 
+function userAnswerStage(msg) {
+    const meta = parseMetaJson(msg?.meta_json);
+    return typeof meta.stage === "string" ? meta.stage : "";
+}
+
+function stageMinAnswerCount(stage) {
+    return STAGE_MIN_ANSWER_COUNT[stage] || 1;
+}
+
+function stageMinAnswerChars(stage) {
+    return STAGE_MIN_ANSWER_CHARS[stage] || 20;
+}
+
 function applyExportStats(payload) {
     const countedUserMessages = (payload.messages || []).filter((m) => isCountedUserAnswer(m));
     const userCount = countedUserMessages.length;
@@ -837,10 +1032,23 @@ function applyExportStats(payload) {
     state.stageMissing = [];
     if (payload.readiness && payload.readiness.stages && payload.readiness.stages[state.stage]) {
         const info = payload.readiness.stages[state.stage];
-        state.stageReady = Boolean(info.ready);
-        state.stageMissing = Array.isArray(info.missing) ? info.missing : [];
-        if (CHAT_STAGES.includes(state.stage) && Array.isArray(info.missing) && info.missing.length) {
-            setStatus(`当前阶段建议补充：${info.missing.slice(0, 2).join("；")}`);
+        const stageAnswers = countedUserMessages.filter((m) => userAnswerStage(m) === state.stage);
+        const stageAnswerCount = stageAnswers.length;
+        const stageAnswerChars = stageAnswers.reduce((acc, m) => acc + String(m.content || "").trim().length, 0);
+        const minCount = stageMinAnswerCount(state.stage);
+        const minChars = stageMinAnswerChars(state.stage);
+
+        const strictMissing = [];
+        if (stageAnswerCount < minCount) strictMissing.push(`至少 ${minCount} 条本阶段有效回答（当前 ${stageAnswerCount} 条）`);
+        if (stageAnswerChars < minChars) strictMissing.push(`至少 ${minChars} 字本阶段有效内容（当前 ${stageAnswerChars} 字）`);
+
+        const baseMissing = Array.isArray(info.missing) ? info.missing : [];
+        const mergedMissing = [...baseMissing, ...strictMissing];
+        state.stageReady = Boolean(info.ready) && strictMissing.length === 0;
+        state.stageMissing = mergedMissing;
+
+        if (CHAT_STAGES.includes(state.stage) && mergedMissing.length) {
+            setStatus(`当前阶段建议补充：${mergedMissing.slice(0, 2).join("；")}`);
         }
     }
 }
@@ -1078,7 +1286,7 @@ async function overlayAgreeAndStart() {
             state.stageMissing = [];
             if (detectStageAdvance(prev, state.stage)) {
                 spawnConfetti(0.9);
-                showProgressPanel(5000);
+                showProgressPanel(adaptivePanelHideDelay("stage_complete"), "stage_complete");
             }
         }
 
@@ -1153,7 +1361,7 @@ async function advanceStageManually() {
 
         if (detectStageAdvance(prevStage, state.stage)) {
             spawnConfetti(1);
-            showProgressPanel(5000);
+            showProgressPanel(adaptivePanelHideDelay("stage_complete"), "stage_complete");
             showToast(`已进入${STAGE_NAMES[state.stage]}阶段`, "success");
         }
 
@@ -1198,16 +1406,11 @@ async function sendMessage() {
         if (data.rights_notice) appendMessage("system", data.rights_notice);
 
         state.stage = data.should_advance_stage ? data.suggested_next_stage : data.stage;
-        if (data.should_advance_stage) {
-            state.stageReady = false;
-            state.stageMissing = [];
-        } else {
-            state.stageReady = Boolean(data.stage_ready);
-            state.stageMissing = Array.isArray(data.missing_requirements) ? data.missing_requirements : [];
-        }
+        state.stageReady = false;
+        state.stageMissing = Array.isArray(data.missing_requirements) ? data.missing_requirements : [];
         if (detectStageAdvance(prevStage, state.stage)) {
             spawnConfetti(1);
-            showProgressPanel(5000);
+            showProgressPanel(adaptivePanelHideDelay("stage_complete"), "stage_complete");
             showToast(`进入${STAGE_NAMES[state.stage]}阶段`, "success");
         }
 
@@ -1246,16 +1449,11 @@ async function skipQuestion() {
         if (data.rights_notice) appendMessage("system", data.rights_notice);
 
         state.stage = data.should_advance_stage ? data.suggested_next_stage : data.stage;
-        if (data.should_advance_stage) {
-            state.stageReady = false;
-            state.stageMissing = [];
-        } else {
-            state.stageReady = Boolean(data.stage_ready);
-            state.stageMissing = Array.isArray(data.missing_requirements) ? data.missing_requirements : [];
-        }
+        state.stageReady = false;
+        state.stageMissing = Array.isArray(data.missing_requirements) ? data.missing_requirements : [];
         if (detectStageAdvance(prevStage, state.stage)) {
             spawnConfetti(0.9);
-            showProgressPanel(5000);
+            showProgressPanel(adaptivePanelHideDelay("stage_complete"), "stage_complete");
         }
 
         syncUi();
@@ -1442,6 +1640,15 @@ function attachEvents() {
     });
 
     els.progressFab.addEventListener("click", toggleProgressPanel);
+    els.progressFab.addEventListener("pointerdown", startFabDrag);
+    els.progressFab.addEventListener("pointermove", onFabDragMove);
+    els.progressFab.addEventListener("pointerup", endFabDrag);
+    els.progressFab.addEventListener("pointercancel", endFabDrag);
+
+    els.progressFab.addEventListener("mouseenter", onProgressHoverEnter);
+    els.progressFab.addEventListener("mouseleave", onProgressHoverLeave);
+    els.progressPanel.addEventListener("mouseenter", onProgressHoverEnter);
+    els.progressPanel.addEventListener("mouseleave", onProgressHoverLeave);
 
     els.userInput.addEventListener("keydown", handleInputKeydown);
     els.userInput.addEventListener("input", () => {
@@ -1467,7 +1674,10 @@ function attachEvents() {
         }
     });
 
-    window.addEventListener("resize", ensureCanvasSize);
+    window.addEventListener("resize", () => {
+        ensureCanvasSize();
+        applyFabPosition();
+    });
 }
 
 async function bootstrap() {
@@ -1476,6 +1686,9 @@ async function bootstrap() {
         attachEvents();
         autosizeTextarea();
         updateWordCounter();
+        loadFabPosition();
+        applyFabPosition();
+        hideProgressPanel();
 
         await loadModelConfig();
         syncUi();

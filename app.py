@@ -86,6 +86,15 @@ STAGE_REQUIREMENTS: Dict[str, List[Tuple[str, int, str]]] = {
     ],
 }
 
+STAGE_MIN_TURNS: Dict[str, int] = {
+    "daily": 2,
+    "evolution": 2,
+    "experience": 2,
+    "difficulty": 2,
+    "impact": 2,
+    "wrapup": 1,
+}
+
 INVITATION_NOTICE = (
     "欢迎参与“数字学习自传”研究。你将通过聊天回顾自己的数字学习经历。"
     "你有权跳过任何问题、随时暂停、撤回访谈；也可以补充修改。"
@@ -293,6 +302,12 @@ def evaluate_stage_ready(stage: str, stage_progress: Dict[str, Any]) -> Tuple[bo
         actual = len(unique_strs(stage_progress.get(field, [])))
         if actual < min_count:
             missing.append(label)
+
+    min_turns = int(STAGE_MIN_TURNS.get(stage, 1))
+    turns = int(stage_progress.get("turns", 0) or 0)
+    if turns < min_turns:
+        missing.append(f"至少 {min_turns} 轮回答（当前 {turns} 轮）")
+
     return len(missing) == 0, missing
 
 
