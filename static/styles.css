@@ -420,6 +420,10 @@ textarea:focus {
 }
 
 .progress-footer {
+    --progress-color-start: #1f6cff;
+    --progress-color-end: #0a84ff;
+    --progress-color-tail: #1b73e8;
+    --progress-color-rgb: 10, 132, 255;
     padding: 14px 16px 16px;
 }
 
@@ -444,7 +448,7 @@ textarea:focus {
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 700;
-    color: #0b6ecf;
+    color: var(--progress-color-end);
 }
 
 .progress-percent span {
@@ -494,7 +498,7 @@ textarea:focus {
     bottom: 0;
     width: 0%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #1f6cff 0%, #0a84ff 100%);
+    background: linear-gradient(90deg, var(--progress-color-start) 0%, var(--progress-color-end) 100%);
     transition: width 0.35s ease;
 }
 
@@ -523,8 +527,8 @@ textarea:focus {
 
 .track-item.active {
     border-color: #fff;
-    background: #0a84ff;
-    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2);
+    background: var(--progress-color-end);
+    box-shadow: 0 0 0 4px rgba(var(--progress-color-rgb), 0.2);
 }
 
 .track-item.done[data-stage="consent_pending"] { background: #16a34a; }
@@ -542,7 +546,7 @@ textarea:focus {
     left: 0;
     top: 0;
     transform: translate(-50%, -4px);
-    background: linear-gradient(135deg, #1f6cff 0%, #0a84ff 100%);
+    background: linear-gradient(135deg, var(--progress-color-start) 0%, var(--progress-color-end) 100%);
     color: #fff;
     border-radius: 14px;
     padding: 9px 14px;
@@ -563,7 +567,7 @@ textarea:focus {
     height: 0;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
-    border-top: 8px solid #1b73e8;
+    border-top: 8px solid var(--progress-color-tail);
 }
 
 .guide-head {

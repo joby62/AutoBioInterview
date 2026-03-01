@@ -38,6 +38,19 @@ const STAGE_HINTS = {
     done: "访谈完成，仍可继续微调文字。"
 };
 
+const STAGE_THEME = {
+    consent_pending: { start: "#22c55e", end: "#16a34a", tail: "#16a34a", rgb: "22,163,74" },
+    daily: { start: "#1f6cff", end: "#0a84ff", tail: "#1b73e8", rgb: "10,132,255" },
+    evolution: { start: "#8b5cf6", end: "#7c3aed", tail: "#7c3aed", rgb: "124,58,237" },
+    experience: { start: "#f59e0b", end: "#ea580c", tail: "#ea580c", rgb: "234,88,12" },
+    difficulty: { start: "#ef4444", end: "#dc2626", tail: "#dc2626", rgb: "220,38,38" },
+    impact: { start: "#10b981", end: "#059669", tail: "#059669", rgb: "5,150,105" },
+    wrapup: { start: "#06b6d4", end: "#0891b2", tail: "#0891b2", rgb: "8,145,178" },
+    review: { start: "#f97316", end: "#ea580c", tail: "#ea580c", rgb: "234,88,12" },
+    done: { start: "#22c55e", end: "#16a34a", tail: "#16a34a", rgb: "22,163,74" },
+    withdrawn: { start: "#9aa5b5", end: "#7a8798", tail: "#7a8798", rgb: "122,135,152" }
+};
+
 const STAGE_GUIDE = {
     consent_pending: {
         title: "开始前先确认知情同意",
@@ -189,6 +202,7 @@ const els = {
     reviseDraftTriggerBtn: document.getElementById("reviseDraftTriggerBtn"),
     approveFinalBtn: document.getElementById("approveFinalBtn"),
     sendBtn: document.getElementById("sendBtn"),
+    progressFooter: document.getElementById("progressFooter"),
     progressPercent: document.getElementById("progressPercent"),
     progressEta: document.getElementById("progressEta"),
     progressFill: document.getElementById("progressFill"),
@@ -305,6 +319,10 @@ function stageIndex(stage) {
     return TRACK_STAGES.indexOf(stage);
 }
 
+function stageTheme(stage) {
+    return STAGE_THEME[stage] || STAGE_THEME.daily;
+}
+
 function roleLabel(role) {
     if (role === "user") return "受访者";
     if (role === "assistant") return "访谈助手";
@@ -416,9 +434,17 @@ function renderProgressSummary() {
     const total = Math.max(1, TRACK_STAGES.length - 1);
     const ratio = idx / total;
     const pct = Math.round(ratio * 100);
+    const theme = stageTheme(state.stage);
 
     els.progressPercent.textContent = `${pct}%`;
     els.progressFill.style.width = `${pct}%`;
+
+    if (els.progressFooter) {
+        els.progressFooter.style.setProperty("--progress-color-start", theme.start);
+        els.progressFooter.style.setProperty("--progress-color-end", theme.end);
+        els.progressFooter.style.setProperty("--progress-color-tail", theme.tail);
+        els.progressFooter.style.setProperty("--progress-color-rgb", theme.rgb);
+    }
 
     const remainingSteps = Math.max(0, total - idx);
     const eta = Math.max(0, remainingSteps * 5);
@@ -431,7 +457,7 @@ function renderProgressSummary() {
     els.progressBubble.textContent = bubbleLabel;
     els.progressBubble.style.left = `${bubblePct}%`;
 
-    els.progressMeaning.textContent = "进度说明：圆点代表各步骤，蓝色进度条显示整体推进。";
+    els.progressMeaning.textContent = "进度说明：圆点代表各步骤，彩色进度条显示整体推进。";
     els.progressStageHint.textContent = `当前步骤：${stageName}。${stageHint}`;
 }
 
