@@ -16,7 +16,6 @@
         <div class="topbar-main">
             <p class="kicker">Digital Learning Interview</p>
             <h1>数字学习自传访谈</h1>
-            <p class="sub">默认快速思考（mini）。可随时切换快/慢，不影响已记录内容。</p>
             <div class="meta-row">
                 <span class="pill pill-stage" id="stageBadge" data-stage="consent_pending">同意访谈</span>
                 <span class="pill" id="tokenBadge">未开始</span>
@@ -45,7 +44,10 @@
             <div class="composer">
                 <div class="composer-top">
                     <span id="wordCounter">0 字</span>
-                    <span id="statusLine">准备开始</span>
+                    <div class="composer-top-actions">
+                        <span id="statusLine">准备开始</span>
+                        <button class="btn btn-primary small hidden" id="advanceStageBtn">进入下一阶段</button>
+                    </div>
                 </div>
                 <textarea id="userInput" placeholder="输入你的回答。双击 Enter 发送；Shift+Enter 换行；Cmd/Ctrl+Enter 立即发送。"></textarea>
                 <div class="composer-actions">
@@ -86,27 +88,30 @@
             </section>
         </aside>
     </section>
-
-    <section class="progress-footer glass" id="progressFooter">
-        <div class="progress-head">
-            <div>
-                <p class="progress-kicker">Your progress</p>
-                <p class="progress-percent"><span id="progressPercent">0%</span> to complete</p>
-            </div>
-            <p class="progress-eta">⏱ <span id="progressEta">45 min</span></p>
-        </div>
-        <p class="progress-meaning" id="progressMeaning">已完成越多，轨道上的蓝色段会越长。</p>
-        <p class="progress-stage-hint" id="progressStageHint">当前步骤：同意访谈。</p>
-        <p class="progress-stage-eta" id="progressStageEta">本阶段预计还需：1-2 min</p>
-        <div class="progress-rail-wrap" id="progressRailWrap">
-            <div class="progress-rail">
-                <div class="progress-fill" id="progressFill"></div>
-                <div class="progress-track" id="progressTrack"></div>
-            </div>
-            <div class="progress-bubble" id="progressBubble">同意访谈</div>
-        </div>
-    </section>
 </div>
+
+<button class="progress-fab" id="progressFab" type="button" title="查看访谈进度">
+    <span class="fab-pct" id="progressFabPct">0%</span>
+</button>
+
+<section class="progress-panel glass" id="progressPanel">
+    <div class="progress-head">
+        <div>
+            <p class="progress-kicker">Your progress</p>
+            <p class="progress-percent"><span id="progressPercent">0%</span> to complete</p>
+        </div>
+        <p class="progress-eta">⏱ <span id="progressEta">45 min</span></p>
+    </div>
+    <p class="progress-stage-hint" id="progressStageHint">当前步骤：同意访谈。</p>
+    <p class="progress-stage-eta" id="progressStageEta">本阶段预计还需：1-2 min</p>
+    <div class="progress-rail-wrap" id="progressRailWrap">
+        <div class="progress-rail">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-track" id="progressTrack"></div>
+        </div>
+        <div class="progress-bubble" id="progressBubble">同意访谈</div>
+    </div>
+</section>
 
 <div class="onboarding-overlay" id="onboardingOverlay">
     <div class="onboarding-modal">

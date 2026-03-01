@@ -42,6 +42,14 @@ body.intro-active .app-shell {
     user-select: none;
 }
 
+body.onboarding-active .progress-panel,
+body.onboarding-active .progress-fab,
+body.intro-active .progress-panel,
+body.intro-active .progress-fab {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .orb {
     position: fixed;
     border-radius: 999px;
@@ -82,7 +90,7 @@ body.intro-active .app-shell {
     height: 100%;
     padding: 12px;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 12px;
     transition: filter 0.22s ease;
 }
@@ -96,7 +104,7 @@ body.intro-active .app-shell {
 }
 
 .topbar {
-    padding: 10px 14px;
+    padding: 8px 12px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
@@ -113,7 +121,7 @@ body.intro-active .app-shell {
 
 .topbar-main h1 {
     margin: 2px 0 0;
-    font-size: clamp(22px, 2.2vw, 30px);
+    font-size: clamp(24px, 2.4vw, 34px);
     line-height: 1.2;
     letter-spacing: -0.01em;
 }
@@ -176,10 +184,10 @@ body.intro-active .app-shell {
 
 .workspace {
     min-height: 0;
-    padding: 12px;
+    padding: 10px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 10px;
 }
 
 .dialog-main {
@@ -345,6 +353,16 @@ body.intro-active .app-shell {
     margin-bottom: 8px;
 }
 
+.composer-top-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hidden {
+    display: none !important;
+}
+
 textarea {
     width: 100%;
     min-height: 120px;
@@ -419,12 +437,65 @@ textarea:focus {
     padding: 10px;
 }
 
-.progress-footer {
+.progress-panel {
     --progress-color-start: #1f6cff;
     --progress-color-end: #0a84ff;
     --progress-color-tail: #1b73e8;
     --progress-color-rgb: 10, 132, 255;
-    padding: 14px 16px 16px;
+    position: fixed;
+    right: 18px;
+    bottom: 88px;
+    z-index: 60;
+    width: min(700px, calc(100vw - 28px));
+    padding: 12px 14px 14px;
+    border-radius: 18px;
+    display: none;
+}
+
+.progress-panel.visible {
+    display: block;
+    animation: fadeUp 0.2s ease;
+}
+
+.progress-fab {
+    --fab-progress: 0;
+    --fab-color: #0a84ff;
+    position: fixed;
+    right: 20px;
+    bottom: 22px;
+    z-index: 61;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    border: none;
+    background: conic-gradient(var(--fab-color) calc(var(--fab-progress) * 1%), #dbe6f4 0);
+    color: #0a63bf;
+    box-shadow: 0 12px 24px rgba(12, 41, 72, 0.22);
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    display: grid;
+    place-items: center;
+}
+
+.progress-fab::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 25%, #f7fbff 0%, #ecf4ff 56%, #e1ecfb 100%);
+}
+
+.progress-fab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(12, 41, 72, 0.25);
+}
+
+.progress-fab .fab-pct {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .progress-head {
@@ -464,7 +535,6 @@ textarea:focus {
     font-variant-numeric: tabular-nums;
 }
 
-.progress-meaning,
 .progress-stage-hint {
     margin: 8px 0 0;
     font-size: 12px;
@@ -915,6 +985,10 @@ select:focus {
         max-height: 38vh;
         overflow: auto;
     }
+
+    .progress-panel {
+        width: min(620px, calc(100vw - 24px));
+    }
 }
 
 @media (max-width: 760px) {
@@ -932,7 +1006,7 @@ select:focus {
     }
 
     .topbar-main h1 {
-        font-size: 22px;
+        font-size: 24px;
     }
 
     .dialog-toolbar {
@@ -990,5 +1064,19 @@ select:focus {
     .progress-bubble {
         padding: 7px 10px;
         font-size: 12px;
+    }
+
+    .progress-panel {
+        right: 10px;
+        bottom: 76px;
+        width: calc(100vw - 20px);
+        padding: 10px 10px 12px;
+    }
+
+    .progress-fab {
+        right: 12px;
+        bottom: 14px;
+        width: 52px;
+        height: 52px;
     }
 }

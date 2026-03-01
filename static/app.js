@@ -191,7 +191,9 @@ const state = {
     introSeenByToken: {},
     estimatedStepMinutes: 5,
     stageReady: false,
-    stageMissing: []
+    stageMissing: [],
+    progressPanelVisible: false,
+    progressPanelTimer: null
 };
 
 const els = {
@@ -216,14 +218,16 @@ const els = {
     viewDraftBtn: document.getElementById("viewDraftBtn"),
     reviseDraftTriggerBtn: document.getElementById("reviseDraftTriggerBtn"),
     approveFinalBtn: document.getElementById("approveFinalBtn"),
+    advanceStageBtn: document.getElementById("advanceStageBtn"),
     sendBtn: document.getElementById("sendBtn"),
-    progressFooter: document.getElementById("progressFooter"),
+    progressFab: document.getElementById("progressFab"),
+    progressFabPct: document.getElementById("progressFabPct"),
+    progressPanel: document.getElementById("progressPanel"),
     progressPercent: document.getElementById("progressPercent"),
     progressEta: document.getElementById("progressEta"),
     progressFill: document.getElementById("progressFill"),
     progressTrack: document.getElementById("progressTrack"),
     progressBubble: document.getElementById("progressBubble"),
-    progressMeaning: document.getElementById("progressMeaning"),
     progressStageHint: document.getElementById("progressStageHint"),
     progressStageEta: document.getElementById("progressStageEta"),
     guideTitle: document.getElementById("guideTitle"),
@@ -530,12 +534,10 @@ function renderProgressSummary() {
     els.progressPercent.textContent = `${pct}%`;
     els.progressFill.style.width = `${pct}%`;
 
-    if (els.progressFooter) {
-        els.progressFooter.style.setProperty("--progress-color-start", theme.start);
-        els.progressFooter.style.setProperty("--progress-color-end", theme.end);
-        els.progressFooter.style.setProperty("--progress-color-tail", theme.tail);
-        els.progressFooter.style.setProperty("--progress-color-rgb", theme.rgb);
-    }
+    els.progressPanel.style.setProperty("--progress-color-start", theme.start);
+    els.progressPanel.style.setProperty("--progress-color-end", theme.end);
+    els.progressPanel.style.setProperty("--progress-color-tail", theme.tail);
+    els.progressPanel.style.setProperty("--progress-color-rgb", theme.rgb);
 
     const reqTotal = STAGE_REQUIREMENT_TOTAL[state.stage] ?? 1;
     const missingCount = Math.min(reqTotal, (state.stageMissing || []).length);
@@ -552,7 +554,8 @@ function renderProgressSummary() {
     const futureCenter = afterCurrentSteps * state.estimatedStepMinutes;
     const overallLow = stageLow + futureCenter * 0.75;
     const overallHigh = stageHigh + futureCenter * 1.25;
-    els.progressEta.textContent = rangeText(overallLow, overallHigh);
+    const overallRange = rangeText(overallLow, overallHigh);
+    els.progressEta.textContent = overallRange;
 
     const stageName = STAGE_NAMES[state.stage] || state.stage;
     const stageHint = STAGE_HINTS[state.stage] || "按提示继续回答，系统会自动推进。";
@@ -560,8 +563,10 @@ function renderProgressSummary() {
     const bubblePct = Math.min(94, Math.max(6, pct));
     els.progressBubble.textContent = bubbleLabel;
     els.progressBubble.style.left = `${bubblePct}%`;
+    els.progressFabPct.textContent = `${pct}%`;
+    els.progressFab.style.setProperty("--fab-progress", `${pct}`);
+    els.progressFab.style.setProperty("--fab-color", theme.end);
 
-    els.progressMeaning.textContent = "进度说明：圆点代表步骤，彩色条显示整体推进；时间为区间估算。";
     els.progressStageHint.textContent = `当前步骤：${stageName}。${stageHint}`;
 
     if (state.stageReady) {
@@ -637,6 +642,51 @@ function confirmIntroAndClose() {
     syncUi();
 }
 
+function syncProgressPanel() {
+    els.progressPanel.classList.toggle("visible", state.progressPanelVisible);
+}
+
+function clearProgressPanelTimer() {
+    if (state.progressPanelTimer) {
+        clearTimeout(state.progressPanelTimer);
+        state.progressPanelTimer = null;
+    }
+}
+
+function showProgressPanel(autoHideMs = 0) {
+    clearProgressPanelTimer();
+    state.progressPanelVisible = true;
+    syncProgressPanel();
+    if (autoHideMs > 0) {
+        state.progressPanelTimer = setTimeout(() => {
+            state.progressPanelVisible = false;
+            syncProgressPanel();
+        }, autoHideMs);
+    }
+}
+
+function hideProgressPanel() {
+    clearProgressPanelTimer();
+    state.progressPanelVisible = false;
+    syncProgressPanel();
+}
+
+function toggleProgressPanel() {
+    if (state.progressPanelVisible) {
+        hideProgressPanel();
+    } else {
+        showProgressPanel();
+    }
+}
+
+function renderAdvanceStageBtn() {
+    const overlayVisible = isOnboardingVisible() || isIntroVisible();
+    const canAdvance = !state.isBusy && !overlayVisible && CHAT_STAGES.includes(state.stage) && state.stageReady;
+    els.advanceStageBtn.classList.toggle("hidden", !canAdvance);
+    if (!canAdvance) return;
+    els.advanceStageBtn.textContent = state.stage === "wrapup" ? "进入草稿阶段" : "进入下一阶段";
+}
+
 function setBusy(flag) {
     state.isBusy = flag;
     const overlayVisible = isOnboardingVisible() || isIntroVisible();
@@ -659,6 +709,7 @@ function setBusy(flag) {
     els.reviseBtn.disabled = flag || !reviewEnabled;
     els.approveBtn.disabled = flag || !reviewEnabled;
     els.shuffleSparkBtn.disabled = flag || !chatEnabled;
+    els.advanceStageBtn.disabled = flag;
 
     if (flag) {
         els.userInput.placeholder = "系统处理中...";
@@ -669,6 +720,7 @@ function setBusy(flag) {
         els.userInput.placeholder = "输入你的回答。双击 Enter 发送；Shift+Enter 换行；Cmd/Ctrl+Enter 立即发送。";
         renderSpeedControl();
     }
+    renderAdvanceStageBtn();
 }
 
 function syncUi() {
@@ -681,6 +733,7 @@ function syncUi() {
     renderGuide();
     syncOnboardingOverlay();
     syncIntroOverlay();
+    syncProgressPanel();
     setBusy(false);
 
     if (state.stage === "consent_pending") {
@@ -1021,8 +1074,11 @@ async function overlayAgreeAndStart() {
             });
             const prev = state.stage;
             state.stage = res.stage || "daily";
+            state.stageReady = false;
+            state.stageMissing = [];
             if (detectStageAdvance(prev, state.stage)) {
                 spawnConfetti(0.9);
+                showProgressPanel(5000);
             }
         }
 
@@ -1063,6 +1119,45 @@ async function overlayDecline() {
 
         await refreshState(true);
         showToast("已记录为不同意参与", "success");
+    } catch (err) {
+        showToast(String(err.message || err), "error");
+    } finally {
+        setBusy(false);
+    }
+}
+
+async function advanceStageManually() {
+    if (state.isBusy || !state.token || !CHAT_STAGES.includes(state.stage)) return;
+    if (!state.stageReady) {
+        showToast("当前阶段还未达标，建议先补充本阶段关键信息。", "");
+        return;
+    }
+
+    setBusy(true);
+    try {
+        const prevStage = state.stage;
+        const data = await api("/advance-stage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: state.token })
+        });
+
+        state.stage = data.stage || prevStage;
+        state.stageReady = false;
+        state.stageMissing = [];
+
+        const nextText = Array.isArray(data.questions) && data.questions.length
+            ? data.questions.join("\n")
+            : "已进入下一阶段，我们继续。";
+        await appendAssistantTypewriter(nextText);
+
+        if (detectStageAdvance(prevStage, state.stage)) {
+            spawnConfetti(1);
+            showProgressPanel(5000);
+            showToast(`已进入${STAGE_NAMES[state.stage]}阶段`, "success");
+        }
+
+        await refreshState();
     } catch (err) {
         showToast(String(err.message || err), "error");
     } finally {
@@ -1112,6 +1207,7 @@ async function sendMessage() {
         }
         if (detectStageAdvance(prevStage, state.stage)) {
             spawnConfetti(1);
+            showProgressPanel(5000);
             showToast(`进入${STAGE_NAMES[state.stage]}阶段`, "success");
         }
 
@@ -1158,6 +1254,7 @@ async function skipQuestion() {
         }
         if (detectStageAdvance(prevStage, state.stage)) {
             spawnConfetti(0.9);
+            showProgressPanel(5000);
         }
 
         syncUi();
@@ -1359,6 +1456,7 @@ function attachEvents() {
     els.introConfirmBtn.addEventListener("click", confirmIntroAndClose);
 
     els.sendBtn.addEventListener("click", sendMessage);
+    els.advanceStageBtn.addEventListener("click", advanceStageManually);
     els.skipBtn.addEventListener("click", skipQuestion);
     els.altBtn.addEventListener("click", openAltModal);
     els.finalizeBtn.addEventListener("click", () => finalizeInterview());
@@ -1383,6 +1481,8 @@ function attachEvents() {
         if (event.target === els.draftModal) closeDraftModal();
     });
 
+    els.progressFab.addEventListener("click", toggleProgressPanel);
+
     els.userInput.addEventListener("keydown", handleInputKeydown);
     els.userInput.addEventListener("input", () => {
         autosizeTextarea();
@@ -1404,6 +1504,7 @@ function attachEvents() {
         if (event.key === "Escape") {
             closeAltModal();
             closeDraftModal();
+            hideProgressPanel();
         }
     });
 

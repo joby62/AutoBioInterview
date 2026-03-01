@@ -649,6 +649,10 @@ class ApproveFinalReq(BaseModel):
     version: Optional[int] = None
 
 
+class AdvanceStageReq(BaseModel):
+    token: str
+
+
 class ModelConfigReq(BaseModel):
     model: Optional[str] = None
     orch_model: Optional[str] = None
@@ -1199,6 +1203,42 @@ def skip_question(req: SkipReq):
 def next_question(token: str):
     iv = get_interview_by_token(token)
     return run_next_step(iv)
+
+
+@app.post("/advance-stage")
+def advance_stage(req: AdvanceStageReq):
+    iv = get_interview_by_token(req.token)
+    fail_stage_guard(iv)
+
+    stage = iv["stage"]
+    if stage not in ACTIVE_STAGES:
+        raise HTTPException(status_code=409, detail=f"Cannot advance at stage '{stage}'")
+
+    progress = parse_progress(iv)
+    stage_progress = progress.get(stage, blank_stage_progress())
+    ready, missing = evaluate_stage_ready(stage, stage_progress)
+    if not ready:
+        raise HTTPException(
+            status_code=400,
+            detail={"message": "当前阶段尚未达标", "missing_requirements": missing},
+        )
+
+    next_s = next_stage(stage)
+    if next_s not in ALL_STAGES:
+        raise HTTPException(status_code=409, detail="Cannot advance further")
+
+    set_interview_stage(iv["id"], next_s)
+
+    if next_s == "review":
+        questions = ["已进入草稿审阅阶段。你可以点击“生成草稿”，或先补充最后一条经历。"]
+    else:
+        questions = unique_strs(safe_questions_for_stage(next_s, []), limit=2)
+
+    q_text = "\n".join([f"{i + 1}. {q}" for i, q in enumerate(questions)])
+    add_message(iv["id"], "assistant", q_text, {"stage": next_s, "manual_advance": True})
+    add_audit_event(iv["id"], "stage_advanced_manual", {"from_stage": stage, "to_stage": next_s})
+
+    return {"ok": True, "stage": next_s, "questions": questions}
 
 
 @app.post("/withdraw")
