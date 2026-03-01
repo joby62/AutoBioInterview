@@ -15,6 +15,8 @@ const STAGE_NAMES = {
     withdrawn: "撤回"
 };
 
+const TOKEN_STORAGE_KEY = "interview_token";
+
 const STAGE_GUIDE = {
     consent_pending: {
         title: "先确认边界，再开始",
@@ -100,8 +102,32 @@ const STAGE_GUIDE = {
 
 const CIRCUMFERENCE = 2 * Math.PI * 48;
 
+function safeStorageRead(key, fallback = "") {
+    try {
+        return window.localStorage.getItem(key) || fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function safeStorageWrite(key, value) {
+    try {
+        window.localStorage.setItem(key, value);
+    } catch {
+        // Ignore storage write failure in restricted document contexts.
+    }
+}
+
+function safeStorageRemove(key) {
+    try {
+        window.localStorage.removeItem(key);
+    } catch {
+        // Ignore storage remove failure in restricted document contexts.
+    }
+}
+
 const state = {
-    token: localStorage.getItem("interview_token") || "",
+    token: safeStorageRead(TOKEN_STORAGE_KEY, ""),
     stage: "consent_pending",
     isBusy: false,
     lastDraft: "",
@@ -552,7 +578,7 @@ async function refreshState(fullRefresh = false) {
 
         syncUi();
     } catch (err) {
-        localStorage.removeItem("interview_token");
+        safeStorageRemove(TOKEN_STORAGE_KEY);
         state.token = "";
         state.stage = "consent_pending";
         els.messages.innerHTML = "";
@@ -626,7 +652,7 @@ async function startNewInterview() {
         const data = await api("/interviews", { method: "POST" });
         state.token = data.token;
         state.stage = data.stage;
-        localStorage.setItem("interview_token", state.token);
+        safeStorageWrite(TOKEN_STORAGE_KEY, state.token);
         state.lastDraft = "";
         els.draftContent.textContent = "尚未生成草稿。";
         els.reviseInstruction.value = "";
@@ -917,14 +943,39 @@ function attachEvents() {
 }
 
 async function bootstrap() {
-    ensureCanvasSize();
-    attachHeroInteraction();
-    attachEvents();
+    try {
+        ensureCanvasSize();
+        attachHeroInteraction();
+        attachEvents();
 
-    syncUi();
-    autosizeTextarea();
-    updateWordCounter();
-    await refreshState(true);
+        syncUi();
+        autosizeTextarea();
+        updateWordCounter();
+        await refreshState(true);
+    } catch (err) {
+        console.error("Bootstrap failed:", err);
+        setStatus("页面初始化失败，请刷新页面重试。");
+        showToast(`页面初始化失败：${String(err.message || err)}`, "error");
+    }
 }
+
+// Expose handlers for inline HTML callbacks across different script execution modes.
+window.startNewInterview = startNewInterview;
+window.withdrawInterview = withdrawInterview;
+window.handleConsent = handleConsent;
+window.sendMessage = sendMessage;
+window.skipQuestion = skipQuestion;
+window.openAltModal = openAltModal;
+window.finalizeInterview = finalizeInterview;
+window.openDraftModal = openDraftModal;
+window.focusRevisionInput = focusRevisionInput;
+window.approveFinal = approveFinal;
+window.closeAltModal = closeAltModal;
+window.submitAlternative = submitAlternative;
+window.closeDraftModal = closeDraftModal;
+window.reviseDraft = reviseDraft;
+window.onBackdropClose = onBackdropClose;
+window.handleInputKey = handleInputKey;
+window.shuffleSparks = shuffleSparks;
 
 bootstrap();
