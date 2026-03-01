@@ -176,7 +176,8 @@ const state = {
     fastModel: "doubao-seed-2-0-mini-260215",
     slowModel: "doubao-seed-2-0-lite-260215",
     speedMode: safeStorageRead(SPEED_PREF_KEY, "fast") === "slow" ? "slow" : "fast",
-    introSeenByToken: {}
+    introSeenByToken: {},
+    estimatedStepMinutes: 5
 };
 
 const els = {
@@ -323,6 +324,62 @@ function stageTheme(stage) {
     return STAGE_THEME[stage] || STAGE_THEME.daily;
 }
 
+function parseIsoTimeMs(value) {
+    if (!value) return null;
+    const t = Date.parse(value);
+    return Number.isFinite(t) ? t : null;
+}
+
+function updatePaceEstimate(payload) {
+    const currentStage = payload?.interview?.stage || state.stage;
+    const currentIdx = Math.max(0, stageIndex(currentStage));
+    if (currentIdx <= 0) return;
+
+    const userMsgs = (payload?.messages || [])
+        .filter((m) => m.role === "user")
+        .filter((m) => {
+            const text = (m.content || "").trim();
+            if (!text) return false;
+            return !text.startsWith("【受访者选择跳过此问题】");
+        });
+
+    const userTimes = userMsgs
+        .map((m) => parseIsoTimeMs(m.created_at))
+        .filter((t) => t !== null)
+        .sort((a, b) => a - b);
+
+    let minutesPerStep = null;
+
+    if (userTimes.length >= 2) {
+        const gaps = [];
+        for (let i = 1; i < userTimes.length; i++) {
+            const gapMin = (userTimes[i] - userTimes[i - 1]) / 60000;
+            // Ignore ultra-short bursts and long idle breaks.
+            if (gapMin >= 0.2 && gapMin <= 30) gaps.push(gapMin);
+        }
+        if (gaps.length) {
+            const avgGap = gaps.reduce((acc, v) => acc + v, 0) / gaps.length;
+            const repliesPerStep = Math.max(1, Math.min(4, userMsgs.length / currentIdx));
+            minutesPerStep = avgGap * repliesPerStep;
+        }
+    }
+
+    if (!Number.isFinite(minutesPerStep)) {
+        const consentMs = parseIsoTimeMs(payload?.interview?.consented_at);
+        if (consentMs) {
+            const elapsedMin = Math.max(0, (Date.now() - consentMs) / 60000);
+            if (elapsedMin > 0) {
+                minutesPerStep = elapsedMin / currentIdx;
+            }
+        }
+    }
+
+    if (!Number.isFinite(minutesPerStep)) return;
+
+    minutesPerStep = Math.max(2, Math.min(20, minutesPerStep));
+    state.estimatedStepMinutes = state.estimatedStepMinutes * 0.65 + minutesPerStep * 0.35;
+}
+
 function roleLabel(role) {
     if (role === "user") return "受访者";
     if (role === "assistant") return "访谈助手";
@@ -447,7 +504,7 @@ function renderProgressSummary() {
     }
 
     const remainingSteps = Math.max(0, total - idx);
-    const eta = Math.max(0, remainingSteps * 5);
+    const eta = Math.max(0, Math.round(remainingSteps * state.estimatedStepMinutes));
     els.progressEta.textContent = `${eta} min`;
 
     const stageName = STAGE_NAMES[state.stage] || state.stage;
@@ -457,7 +514,7 @@ function renderProgressSummary() {
     els.progressBubble.textContent = bubbleLabel;
     els.progressBubble.style.left = `${bubblePct}%`;
 
-    els.progressMeaning.textContent = "进度说明：圆点代表各步骤，彩色进度条显示整体推进。";
+    els.progressMeaning.textContent = "进度说明：圆点代表各步骤，彩色进度条显示整体推进；剩余时间会按你的回答节奏动态估算。";
     els.progressStageHint.textContent = `当前步骤：${stageName}。${stageHint}`;
 }
 
@@ -813,6 +870,7 @@ async function switchSpeed(mode) {
 async function refreshState(fullRefresh = false) {
     if (!state.token) {
         state.stage = "consent_pending";
+        state.estimatedStepMinutes = 5;
         els.messages.innerHTML = "";
         appendMessage("assistant", "欢迎参与。点击上层弹窗里的“我同意并开始”，将自动创建会话并进入访谈。", { animate: false });
         els.statsBadge.textContent = "暂无记录";
@@ -834,6 +892,7 @@ async function refreshState(fullRefresh = false) {
         }
 
         state.stage = data.interview.stage || "consent_pending";
+        updatePaceEstimate(data);
         applyExportStats(data);
 
         const latestDraft = (data.artifacts || []).find((a) => a.type === "draft");
@@ -863,6 +922,7 @@ async function startNewInterview() {
         const data = await api("/interviews", { method: "POST" });
         state.token = data.token;
         state.stage = data.stage;
+        state.estimatedStepMinutes = 5;
         safeStorageWrite(TOKEN_KEY, state.token);
         state.lastDraft = "";
         els.reviseInstruction.value = "";
@@ -884,6 +944,7 @@ async function overlayAgreeAndStart() {
             const created = await api("/interviews", { method: "POST" });
             state.token = created.token;
             state.stage = created.stage;
+            state.estimatedStepMinutes = 5;
             safeStorageWrite(TOKEN_KEY, state.token);
         }
 
