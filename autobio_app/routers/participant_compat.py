@@ -275,10 +275,19 @@ def next_question(token: str):
     questions = _parse_questions((assistant or {}).get("content", ""))
     readiness = _readiness(state_payload.get("progress", {}))
     stage_info = readiness.get("stages", {}).get(stage, {"ready": False, "missing": []})
+    if not questions:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "未找到可用追问（未使用 fallback）",
+                "stage": stage,
+                "hint": "请检查 /messages 上一步是否成功调用 LLM。",
+            },
+        )
 
     return {
         "stage": stage,
-        "questions": questions[:2] if questions else ["我们继续。你愿意再补充一个具体细节吗？"],
+        "questions": questions[:2],
         "followup_intent": "compat_fallback",
         "should_advance_stage": False,
         "suggested_next_stage": stage,

@@ -6,6 +6,10 @@ from .config import SETTINGS
 
 
 def _build_available_models() -> List[str]:
+    baseline = [
+        "doubao-seed-2-0-mini-260215",
+        "doubao-seed-2-0-lite-260215",
+    ]
     configured = [
         m.strip()
         for m in os.environ.get(
@@ -15,9 +19,9 @@ def _build_available_models() -> List[str]:
         if m.strip()
     ]
     if not configured:
-        configured = [SETTINGS.default_model, SETTINGS.fallback_model]
+        configured = []
     out: List[str] = []
-    for model in configured:
+    for model in baseline + configured:
         if model not in out:
             out.append(model)
     return out
@@ -29,8 +33,15 @@ _DEFAULT_MODEL = SETTINGS.default_model
 if _DEFAULT_MODEL not in _AVAILABLE_MODELS:
     _AVAILABLE_MODELS.append(_DEFAULT_MODEL)
 
-_ORCH_MODEL = _DEFAULT_MODEL
-_WRITE_MODEL = _DEFAULT_MODEL
+_ENV_ORCH = (os.environ.get("MODEL_ORCH") or "").strip()
+_ENV_WRITE = (os.environ.get("MODEL_WRITE") or "").strip()
+if _ENV_ORCH and _ENV_ORCH not in _AVAILABLE_MODELS:
+    _AVAILABLE_MODELS.append(_ENV_ORCH)
+if _ENV_WRITE and _ENV_WRITE not in _AVAILABLE_MODELS:
+    _AVAILABLE_MODELS.append(_ENV_WRITE)
+
+_ORCH_MODEL = _ENV_ORCH or _DEFAULT_MODEL
+_WRITE_MODEL = _ENV_WRITE or _DEFAULT_MODEL
 
 
 def get_active_models() -> Tuple[str, str]:

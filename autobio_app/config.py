@@ -22,7 +22,17 @@ class Settings:
 def load_settings() -> Settings:
     base_dir = Path(__file__).resolve().parent.parent
     db_path = Path(os.environ.get("DB_PATH", str(base_dir / "interviews.db"))).resolve()
-    ark_api_key = os.environ.get("ARK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+    ark_api_key = (os.environ.get("ARK_API_KEY") or os.environ.get("OPENAI_API_KEY") or "").strip()
+    default_model = (
+        os.environ.get("ARK_MODEL_DEFAULT")
+        or os.environ.get("MODEL_ORCH")
+        or "doubao-seed-2-0-mini-260215"
+    ).strip()
+    fallback_model = (
+        os.environ.get("ARK_MODEL_FALLBACK")
+        or os.environ.get("MODEL_WRITE")
+        or "doubao-seed-2-0-lite-260215"
+    ).strip()
     return Settings(
         app_name="AutoBio Interview Platform",
         app_version="3.0",
@@ -30,8 +40,8 @@ def load_settings() -> Settings:
         db_path=db_path,
         ark_base_url=os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"),
         ark_api_key=ark_api_key,
-        default_model=os.environ.get("ARK_MODEL_DEFAULT", "doubao-seed-2-0-mini-260215"),
-        fallback_model=os.environ.get("ARK_MODEL_FALLBACK", "doubao-seed-2-0-lite-260215"),
+        default_model=default_model,
+        fallback_model=fallback_model,
         cookie_researcher=os.environ.get("COOKIE_RESEARCHER", "abi_researcher_session"),
         cookie_participant=os.environ.get("COOKIE_PARTICIPANT", "abi_participant_token"),
         researcher_session_hours=int(os.environ.get("RESEARCHER_SESSION_HOURS", "72")),

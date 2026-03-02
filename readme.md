@@ -77,6 +77,9 @@ ARK_API_KEY=你的豆包兼容 key
 ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 ARK_MODEL_DEFAULT=doubao-seed-2-0-mini-260215
 ARK_MODEL_FALLBACK=doubao-seed-2-0-lite-260215
+# 可选：兼容旧配置名，作为初始运行模型
+MODEL_ORCH=doubao-seed-2-0-mini-260215
+MODEL_WRITE=doubao-seed-2-0-lite-260215
 DB_PATH=./interviews.db
 ```
 
@@ -91,6 +94,9 @@ uvicorn app:app --host 0.0.0.0 --port 8002 --reload
 - 发起者控制台: `http://127.0.0.1:8002/researcher`
 - 受访者页面: `http://127.0.0.1:8002/participant/{invite_code}`
 - 示例受访者页面: `http://127.0.0.1:8002/participant/sample`
+
+健康检查（含模型与 key 读取状态）：
+- `http://127.0.0.1:8002/healthz`
 
 ## 主要 API
 

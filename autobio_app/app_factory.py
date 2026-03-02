@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import SETTINGS
 from .db import DB, now_iso
+from .model_runtime import get_model_config
 from .routers import auth_router, participant_compat_router, participant_router, researcher_router
 from .services.researcher import PUBLIC_SAMPLE_INVITE_CODE, ensure_public_sample_project
 
@@ -62,6 +63,13 @@ def create_app() -> FastAPI:
 
     @app.get("/healthz")
     async def healthz():
-        return {"ok": True, "ts": now_iso(), "db": str(SETTINGS.db_path)}
+        return {
+            "ok": True,
+            "ts": now_iso(),
+            "db": str(SETTINGS.db_path),
+            "ark_base_url": SETTINGS.ark_base_url,
+            "ark_api_key_present": bool(SETTINGS.ark_api_key),
+            "models": get_model_config(),
+        }
 
     return app

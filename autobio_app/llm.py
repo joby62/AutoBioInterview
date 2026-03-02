@@ -57,6 +57,8 @@ def _parse_json_text(text: str) -> Dict[str, Any]:
 
 class LLMClient:
     def __init__(self) -> None:
+        if not SETTINGS.ark_api_key:
+            raise RuntimeError("Missing ARK_API_KEY (or OPENAI_API_KEY fallback). Check root .env and restart uvicorn.")
         self.client = OpenAI(base_url=SETTINGS.ark_base_url, api_key=SETTINGS.ark_api_key)
 
     def text(self, *, system_prompt: str, user_text: str, model: Optional[str] = None) -> str:
@@ -72,20 +74,9 @@ class LLMClient:
             text = _extract_text(resp)
             if text:
                 return text
-        except Exception:
-            pass
-
-        resp = self.client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_text},
-            ],
-        )
-        text = _extract_text(resp)
-        if not text:
-            raise RuntimeError("Empty model output")
-        return text
+            raise RuntimeError("Responses API returned empty text")
+        except Exception as exc:
+            raise RuntimeError(f"Responses API call failed (model={model_name}): {exc}") from exc
 
     def json(self, *, system_prompt: str, user_text: str, schema: Dict[str, Any], model: Optional[str] = None) -> Dict[str, Any]:
         model_name = model or SETTINGS.default_model
@@ -109,19 +100,9 @@ class LLMClient:
             text = _extract_text(resp)
             if text:
                 return _parse_json_text(text)
-        except Exception:
-            pass
-
-        resp = self.client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_text},
-            ],
-            response_format={"type": "json_schema", "json_schema": schema},
-        )
-        text = _extract_text(resp)
-        return _parse_json_text(text)
+            raise RuntimeError("Responses API returned empty JSON text")
+        except Exception as exc:
+            raise RuntimeError(f"Responses API call failed (model={model_name}): {exc}") from exc
 
 
 LLM = LLMClient()
