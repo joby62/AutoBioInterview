@@ -1,13 +1,13 @@
-{$APP_DOMAIN} {
-    encode gzip zstd
+{
+    auto_https off
+}
 
-    # Keep long-lived researcher/participant sessions over HTTPS.
+yuexuan.asia, www.yuexuan.asia, m.yuexuan.asia {
+    encode gzip zstd
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         Referrer-Policy "strict-origin-when-cross-origin"
     }
-
     reverse_proxy app:8000
 }
