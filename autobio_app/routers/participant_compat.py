@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from ..config import SETTINGS
 from ..db import DB, now_iso
+from ..model_runtime import get_model_config, set_model_config
 from ..prompts import ACTIVE_STAGES
 from ..services.participant import (
     advance_stage,
@@ -20,13 +20,6 @@ from ..services.participant import (
 )
 
 router = APIRouter(tags=["participant_compat"])
-
-MODEL_STATE = {
-    "orch_model": SETTINGS.default_model,
-    "write_model": SETTINGS.default_model,
-    "available_models": [SETTINGS.default_model, SETTINGS.fallback_model],
-    "default_model": SETTINGS.default_model,
-}
 
 NEXT_CACHE: Dict[str, Dict[str, Any]] = {}
 
@@ -211,25 +204,15 @@ def _build_next_from_result(result: Dict[str, Any], stage: str) -> Dict[str, Any
 
 @router.get("/model-config")
 def model_config_get():
-    return MODEL_STATE
+    return get_model_config()
 
 
 @router.post("/model-config")
 def model_config_set(req: ModelConfigReq):
-    if req.model:
-        MODEL_STATE["orch_model"] = req.model
-        MODEL_STATE["write_model"] = req.model
-        if req.model not in MODEL_STATE["available_models"]:
-            MODEL_STATE["available_models"].append(req.model)
-    if req.orch_model:
-        MODEL_STATE["orch_model"] = req.orch_model
-        if req.orch_model not in MODEL_STATE["available_models"]:
-            MODEL_STATE["available_models"].append(req.orch_model)
-    if req.write_model:
-        MODEL_STATE["write_model"] = req.write_model
-        if req.write_model not in MODEL_STATE["available_models"]:
-            MODEL_STATE["available_models"].append(req.write_model)
-    return MODEL_STATE
+    try:
+        return set_model_config(model=req.model, orch_model=req.orch_model, write_model=req.write_model)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail={"message": str(exc), "available_models": get_model_config()["available_models"]})
 
 
 @router.post("/interviews")

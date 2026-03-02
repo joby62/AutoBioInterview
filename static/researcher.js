@@ -179,9 +179,10 @@ function renderProjectDetail() {
   els.sessionList.innerHTML = sessions
     .map((s) => {
       const active = state.currentSession && state.currentSession.id === s.id ? "active" : "";
+      const tag = s.is_sample_demo ? "（示例对话）" : "";
       return `
         <div class="session-item ${active}" data-id="${s.id}">
-          <strong>${s.id.slice(0, 8)}</strong>
+          <strong>${s.id.slice(0, 8)}${tag}</strong>
           <div class="sub">阶段：${stageText(s.stage)} · 消息 ${s.message_count || 0}</div>
           <div class="sub">更新时间：${(s.updated_at || "").replace("T", " ").slice(0, 19)}</div>
         </div>

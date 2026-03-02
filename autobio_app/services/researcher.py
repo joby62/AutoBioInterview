@@ -14,6 +14,7 @@ from ..security import hash_password, new_token, verify_password
 
 PUBLIC_SAMPLE_INVITE_CODE = "sample-cuc-2026"
 PUBLIC_SAMPLE_OWNER_EMAIL = "__public_sample__@autobio.local"
+PUBLIC_SAMPLE_PARTICIPANT_TOKEN = "sample-demo-session"
 PUBLIC_SAMPLE_TITLE = "示例项目｜中国传媒大学数字学习自传访谈（公开学习）"
 PUBLIC_SAMPLE_INVITATION = (
     "【数字学习自传访谈邀请函】\n"
@@ -65,7 +66,7 @@ PUBLIC_SAMPLE_MESSAGES: List[Dict[str, Any]] = [
     },
     {
         "role": "assistant",
-        "content": "说清变化前后怎么学，再补一个触发变化的事件。",
+        "content": "你刚才提到学习节奏有变化。能具体说说变化前后分别怎么学吗？另外，是什么事件触发了这次变化？",
         "meta": {"stage": "evolution"},
     },
     {
@@ -75,7 +76,7 @@ PUBLIC_SAMPLE_MESSAGES: List[Dict[str, Any]] = [
     },
     {
         "role": "assistant",
-        "content": "挑一段最难忘经历，说清当时感受和原因。",
+        "content": "挑一段最难忘的数字学习经历，具体讲讲当时发生了什么。那一刻你的感受是什么，背后原因是什么？",
         "meta": {"stage": "experience"},
     },
     {
@@ -85,7 +86,7 @@ PUBLIC_SAMPLE_MESSAGES: List[Dict[str, Any]] = [
     },
     {
         "role": "assistant",
-        "content": "描述最近遇到的困难，再说你试过什么方法、效果如何。",
+        "content": "最近一次学习受阻发生在什么场景？你后来试了哪些方法来应对，哪些有效、哪些无效？",
         "meta": {"stage": "difficulty"},
     },
     {
@@ -95,7 +96,7 @@ PUBLIC_SAMPLE_MESSAGES: List[Dict[str, Any]] = [
     },
     {
         "role": "assistant",
-        "content": "讲一个积极影响，再讲一个让你矛盾的影响。",
+        "content": "数字学习最近给你带来的一个积极影响是什么？同时它有没有带来一个让你矛盾或有压力的影响？",
         "meta": {"stage": "impact"},
     },
     {
@@ -248,6 +249,21 @@ def ensure_public_sample_project() -> Dict[str, Any]:
             invite_id = invite["id"]
             project_id = invite["project_id"]
             conn.execute("UPDATE invite_links SET status='active', expires_at=NULL WHERE id=?", (invite_id,))
+            conn.execute(
+                """
+                UPDATE projects
+                SET owner_user_id=?, title=?, invitation_text=?, template_json=?, updated_at=?
+                WHERE id=?
+                """,
+                (
+                    owner_id,
+                    PUBLIC_SAMPLE_TITLE,
+                    PUBLIC_SAMPLE_INVITATION,
+                    json.dumps(template, ensure_ascii=False),
+                    created_at,
+                    project_id,
+                ),
+            )
         else:
             project_id = DB.uuid()
             invite_id = DB.uuid()
@@ -276,17 +292,15 @@ def ensure_public_sample_project() -> Dict[str, Any]:
 
         demo = conn.execute(
             """
-            SELECT id, summary_text
+            SELECT id
             FROM interview_sessions
-            WHERE project_id=?
-            ORDER BY created_at ASC
+            WHERE project_id=? AND participant_token=?
             LIMIT 1
             """,
-            (project_id,),
+            (project_id, PUBLIC_SAMPLE_PARTICIPANT_TOKEN),
         ).fetchone()
         if not demo:
             session_id = DB.uuid()
-            participant_token = f"sample-{new_token(8)}"
             conn.execute(
                 """
                 INSERT INTO interview_sessions (
@@ -298,7 +312,7 @@ def ensure_public_sample_project() -> Dict[str, Any]:
                     session_id,
                     project_id,
                     invite_id,
-                    participant_token,
+                    PUBLIC_SAMPLE_PARTICIPANT_TOKEN,
                     json.dumps(progress, ensure_ascii=False),
                     created_at,
                     PUBLIC_SAMPLE_SUMMARY,
@@ -306,26 +320,45 @@ def ensure_public_sample_project() -> Dict[str, Any]:
                     created_at,
                 ),
             )
-            base = now - timedelta(minutes=18)
-            for idx, msg in enumerate(PUBLIC_SAMPLE_MESSAGES):
-                ts = (base + timedelta(seconds=idx * 35)).isoformat()
-                conn.execute(
-                    """
-                    INSERT INTO messages (id, session_id, role, content, meta_json, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        DB.uuid(),
-                        session_id,
-                        msg.get("role", "assistant"),
-                        msg.get("content", ""),
-                        json.dumps(msg.get("meta", {}), ensure_ascii=False),
-                        ts,
-                    ),
-                )
             seeded_new_demo = True
             seeded_project_id = project_id
             seeded_session_id = session_id
+        else:
+            session_id = demo["id"]
+            conn.execute(
+                """
+                UPDATE interview_sessions
+                SET invite_id=?, stage='done', progress_json=?, consented_at=?, withdrawn_at=NULL, summary_text=?, updated_at=?
+                WHERE id=?
+                """,
+                (
+                    invite_id,
+                    json.dumps(progress, ensure_ascii=False),
+                    created_at,
+                    PUBLIC_SAMPLE_SUMMARY,
+                    created_at,
+                    session_id,
+                ),
+            )
+
+        conn.execute("DELETE FROM messages WHERE session_id=?", (session_id,))
+        base = now - timedelta(minutes=18)
+        for idx, msg in enumerate(PUBLIC_SAMPLE_MESSAGES):
+            ts = (base + timedelta(seconds=idx * 35)).isoformat()
+            conn.execute(
+                """
+                INSERT INTO messages (id, session_id, role, content, meta_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    DB.uuid(),
+                    session_id,
+                    msg.get("role", "assistant"),
+                    msg.get("content", ""),
+                    json.dumps(msg.get("meta", {}), ensure_ascii=False),
+                    ts,
+                ),
+            )
 
     if seeded_new_demo:
         DB.add_audit(
@@ -562,14 +595,16 @@ def get_project_detail(owner_user_id: str, project_id: str) -> Dict[str, Any]:
         sessions = conn.execute(
             """
             SELECT s.id, s.stage, s.consented_at, s.withdrawn_at, s.created_at, s.updated_at,
+                   s.participant_token,
+                   CASE WHEN s.participant_token=? THEN 1 ELSE 0 END AS is_sample_demo,
                    COUNT(m.id) AS message_count
             FROM interview_sessions s
             LEFT JOIN messages m ON m.session_id = s.id
             WHERE s.project_id=?
-            GROUP BY s.id
-            ORDER BY s.updated_at DESC
+            GROUP BY s.id, s.participant_token
+            ORDER BY is_sample_demo DESC, s.updated_at DESC
             """,
-            (project_id,),
+            (PUBLIC_SAMPLE_PARTICIPANT_TOKEN, project_id),
         ).fetchall()
 
     data = dict(p)

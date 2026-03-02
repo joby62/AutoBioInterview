@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException
 
-from ..config import SETTINGS
 from ..db import DB, now_iso
 from ..llm import LLM
+from ..model_runtime import get_active_models
 from ..prompts import (
     ACTIVE_STAGES,
     DEFAULT_TEMPLATE,
@@ -285,6 +285,71 @@ def _update_progress(progress: Dict[str, Any], stage: str, user_text: str, stage
     return progress, ready, missing
 
 
+def _default_stage_questions(stage: str, stage_conf: Dict[str, Any], missing: Optional[List[str]] = None) -> List[str]:
+    missing = missing or []
+    if stage == "daily":
+        return [
+            "回到最近一次数字学习场景，具体是几点、在哪个平台、学了什么内容？",
+            "这类学习通常在你一天的哪个时段发生？大概每周几次？",
+        ]
+    if stage == "evolution":
+        return [
+            "你能讲一个学习方式明显变化的节点吗？变化前后分别怎么学？",
+            "当时是什么事件触发了这次变化？它为什么重要？",
+        ]
+    if stage == "experience":
+        return [
+            "挑一段最难忘的数字学习经历，说说当时具体发生了什么。",
+            "那一刻你的感受是什么？这些感受背后的原因是什么？",
+        ]
+    if stage == "difficulty":
+        return [
+            "最近一次学习受阻是什么情况？当时最卡在哪一步？",
+            "你尝试了哪些应对方法？哪些有效、哪些无效？",
+        ]
+    if stage == "impact":
+        return [
+            "数字学习最近对你的学业或工作带来了哪些具体改变？",
+            "它有没有带来让你矛盾的影响，比如效率提升和压力上升并存？",
+        ]
+    if stage == "wrapup":
+        if missing:
+            return [
+                f"收尾前还差这部分信息：{missing[0]}。你愿意补一个具体例子吗？",
+                "如果没有更多经历，也可以说明哪些细节需要匿名化处理。",
+            ]
+        return [
+            "还有没有你认为必须写进自传、但我还没问到的关键经历？",
+            "是否有单位、地点、课程名等需要匿名化处理的细节？",
+        ]
+
+    hints = stage_conf.get("prompt_hints", []) if isinstance(stage_conf.get("prompt_hints"), list) else []
+    if hints:
+        return [str(hints[0]).strip()]
+    return ["你能再补充一个具体片段吗？"]
+
+
+def _normalize_questions(stage: str, stage_conf: Dict[str, Any], raw_questions: List[str], missing: Optional[List[str]] = None) -> List[str]:
+    picked = [str(q).strip() for q in raw_questions if str(q).strip()][:2]
+    fallback = _default_stage_questions(stage, stage_conf, missing)
+
+    if not picked:
+        return fallback[:2]
+
+    normalized: List[str] = []
+    for idx, q in enumerate(picked):
+        # Very short prompts usually cause shallow answers; replace with richer guardrail fallback.
+        if len(q) < 14:
+            normalized.append(fallback[min(idx, len(fallback) - 1)])
+        else:
+            normalized.append(q)
+
+    while len(normalized) < min(2, len(fallback)):
+        normalized.append(fallback[len(normalized)])
+
+    return normalized[:2]
+
+
 def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[str, Any], stage_conf: Dict[str, Any]) -> Dict[str, Any]:
     dialogue = _recent_dialogue(session["id"], limit=10)
     payload = {
@@ -300,15 +365,16 @@ def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[st
         "recent_dialogue": dialogue,
     }
 
+    orch_model, _ = get_active_models()
     try:
         out = LLM.json(
             system_prompt=QUESTION_SYSTEM_PROMPT,
             user_text=json.dumps(payload, ensure_ascii=False),
             schema=QUESTION_SCHEMA,
-            model=SETTINGS.default_model,
+            model=orch_model,
         )
         questions = out.get("questions", []) if isinstance(out.get("questions"), list) else []
-        questions = [str(q).strip() for q in questions if str(q).strip()][:2]
+        questions = _normalize_questions(stage, stage_conf, questions)
         if questions:
             return {
                 "questions": questions,
@@ -318,10 +384,7 @@ def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[st
     except Exception:
         pass
 
-    fallback_hint = stage_conf.get("prompt_hints", [])
-    q1 = fallback_hint[0] if fallback_hint else "你能再补充一个具体场景吗？"
-    q2 = fallback_hint[1] if len(fallback_hint) > 1 else "这个经历对你有什么影响？"
-    return {"questions": [q1, q2], "stage_ready_hint": False, "reason": "fallback"}
+    return {"questions": _default_stage_questions(stage, stage_conf)[:2], "stage_ready_hint": False, "reason": "fallback"}
 
 
 def post_message(participant_token: str, content: str) -> Dict[str, Any]:
@@ -442,10 +505,11 @@ def generate_summary(participant_token: str) -> Dict[str, Any]:
     )
 
     try:
+        _, write_model = get_active_models()
         summary = LLM.text(
             system_prompt=SUMMARY_SYSTEM_PROMPT,
             user_text=user_payload,
-            model=SETTINGS.default_model,
+            model=write_model,
         ).strip()
     except Exception:
         summary = "总结暂时生成失败。你可以稍后重试，或联系研究者导出原始对话。"
