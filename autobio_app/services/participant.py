@@ -312,7 +312,7 @@ def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[st
         raise HTTPException(
             status_code=502,
             detail={
-                "message": "LLM 提问失败（未使用 fallback）",
+                "message": "LLM 提问失败（未自动重试）",
                 "stage": stage,
                 "model": orch_model,
                 "error": str(exc),
@@ -325,7 +325,7 @@ def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[st
         raise HTTPException(
             status_code=502,
             detail={
-                "message": "LLM 返回空问题（未使用 fallback）",
+                "message": "LLM 返回空问题（未自动重试）",
                 "stage": stage,
                 "model": orch_model,
                 "raw": out,
@@ -335,7 +335,7 @@ def _next_questions(session: Dict[str, Any], stage: str, progress_stage: Dict[st
         raise HTTPException(
             status_code=502,
             detail={
-                "message": "LLM 返回问题过短（未使用 fallback）",
+                "message": "LLM 返回问题过短（未自动重试）",
                 "stage": stage,
                 "model": orch_model,
                 "questions": questions,
@@ -476,7 +476,7 @@ def generate_summary(participant_token: str) -> Dict[str, Any]:
         raise HTTPException(
             status_code=502,
             detail={
-                "message": "LLM 总结失败（未使用 fallback）",
+                "message": "LLM 总结失败（未自动重试）",
                 "model": write_model,
                 "error": str(exc),
             },

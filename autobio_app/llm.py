@@ -58,7 +58,7 @@ def _parse_json_text(text: str) -> Dict[str, Any]:
 class LLMClient:
     def __init__(self) -> None:
         if not SETTINGS.ark_api_key:
-            raise RuntimeError("Missing ARK_API_KEY (or OPENAI_API_KEY fallback). Check root .env and restart uvicorn.")
+            raise RuntimeError("Missing ARK_API_KEY (or OPENAI_API_KEY alias). Check root .env and restart uvicorn.")
         self.client = OpenAI(base_url=SETTINGS.ark_base_url, api_key=SETTINGS.ark_api_key)
 
     def text(self, *, system_prompt: str, user_text: str, model: Optional[str] = None) -> str:

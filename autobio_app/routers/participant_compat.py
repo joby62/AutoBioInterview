@@ -279,7 +279,7 @@ def next_question(token: str):
         raise HTTPException(
             status_code=409,
             detail={
-                "message": "未找到可用追问（未使用 fallback）",
+                "message": "未找到可用追问（未自动重试）",
                 "stage": stage,
                 "hint": "请检查 /messages 上一步是否成功调用 LLM。",
             },
@@ -288,7 +288,7 @@ def next_question(token: str):
     return {
         "stage": stage,
         "questions": questions[:2],
-        "followup_intent": "compat_fallback",
+        "followup_intent": "compat_recovered",
         "should_advance_stage": False,
         "suggested_next_stage": stage,
         "risk_flags": ["NONE"],

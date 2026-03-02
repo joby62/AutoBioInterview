@@ -15,7 +15,7 @@ def _build_available_models() -> List[str]:
         m.strip()
         for m in os.environ.get(
             "ARK_MODEL_CHOICES",
-            f"{SETTINGS.default_model},{SETTINGS.fallback_model}",
+            f"{SETTINGS.default_model},{SETTINGS.secondary_model}",
         ).split(",")
         if m.strip()
     ]

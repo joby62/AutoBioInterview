@@ -75,13 +75,22 @@ static/
 ```env
 ARK_API_KEY=你的豆包兼容 key
 ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-ARK_MODEL_DEFAULT=doubao-seed-2-0-mini-260215
-ARK_MODEL_FALLBACK=doubao-seed-2-0-lite-260215
-# 可选：兼容旧配置名，作为初始运行模型
+
+# 可选：/model-config 可选模型列表（建议包含 mini/lite/pro）
+ARK_MODEL_CHOICES=doubao-seed-2-0-mini-260215,doubao-seed-2-0-lite-260215,doubao-seed-2-0-pro-260215
+
+# 启动时的初始生效模型（系统不会在失败时自动切模型重试）
 MODEL_ORCH=doubao-seed-2-0-mini-260215
 MODEL_WRITE=doubao-seed-2-0-lite-260215
+
+# 兼容旧命名（可选）：等价于上面的初始模型别名
+# ARK_MODEL_DEFAULT=doubao-seed-2-0-mini-260215
+# ARK_MODEL_FALLBACK=doubao-seed-2-0-lite-260215
+
 DB_PATH=./interviews.db
 ```
+
+可直接复制：`cp .env.example .env`
 
 ## 本地运行
 

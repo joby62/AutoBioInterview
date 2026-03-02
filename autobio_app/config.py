@@ -12,7 +12,7 @@ class Settings:
     ark_base_url: str
     ark_api_key: str
     default_model: str
-    fallback_model: str
+    secondary_model: str
     cookie_researcher: str
     cookie_participant: str
     researcher_session_hours: int
@@ -28,7 +28,7 @@ def load_settings() -> Settings:
         or os.environ.get("MODEL_ORCH")
         or "doubao-seed-2-0-mini-260215"
     ).strip()
-    fallback_model = (
+    secondary_model = (
         os.environ.get("ARK_MODEL_FALLBACK")
         or os.environ.get("MODEL_WRITE")
         or "doubao-seed-2-0-lite-260215"
@@ -41,7 +41,7 @@ def load_settings() -> Settings:
         ark_base_url=os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"),
         ark_api_key=ark_api_key,
         default_model=default_model,
-        fallback_model=fallback_model,
+        secondary_model=secondary_model,
         cookie_researcher=os.environ.get("COOKIE_RESEARCHER", "abi_researcher_session"),
         cookie_participant=os.environ.get("COOKIE_PARTICIPANT", "abi_participant_token"),
         researcher_session_hours=int(os.environ.get("RESEARCHER_SESSION_HOURS", "72")),
