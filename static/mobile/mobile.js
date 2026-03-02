@@ -60,7 +60,10 @@ const state = {
     speedMode: "fast",
     availableModels: [],
     modelConfig: null,
-    speedMenuOpen: false
+    speedMenuOpen: false,
+    forceStickToBottom: true,
+    lastMessageSignature: "",
+    keyboardOffsetPx: 0
 };
 
 const els = {
@@ -99,19 +102,29 @@ function pickModelByMode(mode) {
 
 function setBusy(flag) {
     state.busy = flag;
-    const stage = state.payload?.session?.stage;
-    const chatEnabled = ACTIVE_STAGES.includes(stage) && !flag;
-
-    els.userInput.disabled = !chatEnabled;
-    els.sendBtn.disabled = !chatEnabled;
-    els.advanceBtn.disabled = flag || !ACTIVE_STAGES.includes(stage);
-    els.summaryBtn.disabled = flag || ![...ACTIVE_STAGES, "review"].includes(stage || "");
-    els.consentAgreeBtn.disabled = flag;
-    els.consentDeclineBtn.disabled = flag;
+    updateComposerAvailability();
 
     if (flag) {
         els.composerHint.textContent = "系统处理中...";
+        return;
     }
+
+    if (state.payload) {
+        renderStage();
+    }
+}
+
+function updateComposerAvailability() {
+    const stage = state.payload?.session?.stage;
+    const chatEnabled = ACTIVE_STAGES.includes(stage) && !state.busy;
+    const hasInput = Boolean(els.userInput.value.trim());
+
+    els.userInput.disabled = !chatEnabled;
+    els.sendBtn.disabled = !chatEnabled || !hasInput;
+    els.advanceBtn.disabled = state.busy || !ACTIVE_STAGES.includes(stage);
+    els.summaryBtn.disabled = state.busy || ![...ACTIVE_STAGES, "review"].includes(stage || "");
+    els.consentAgreeBtn.disabled = state.busy;
+    els.consentDeclineBtn.disabled = state.busy;
 }
 
 function showToast(text, error = false) {
@@ -141,8 +154,8 @@ async function api(path, options = {}) {
 
 function autosizeInput() {
     const el = els.userInput;
-    el.style.height = "46px";
-    const next = Math.max(46, Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.3)));
+    el.style.height = "44px";
+    const next = Math.max(44, Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.3)));
     el.style.height = `${next}px`;
 }
 
@@ -214,16 +227,44 @@ function renderSparks() {
         .join("");
 }
 
+function isNearBottom() {
+    const el = els.chatScroll;
+    const remain = el.scrollHeight - el.scrollTop - el.clientHeight;
+    return remain < 56;
+}
+
+function escapeHtml(raw) {
+    return String(raw || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
 function renderMessages() {
     const list = state.payload?.messages || [];
+    const signature = list.map((m) => `${m.role || "assistant"}::${String(m.content || "")}`).join("\n---\n");
+    const shouldStick = state.forceStickToBottom || isNearBottom();
+
     if (!list.length) {
         els.chatScroll.innerHTML = '<div class="empty">暂无消息，开始说第一句吧。</div>';
+        state.lastMessageSignature = "";
+        state.forceStickToBottom = false;
+        return;
+    }
+
+    if (signature === state.lastMessageSignature) {
+        if (shouldStick) {
+            requestAnimationFrame(() => {
+                els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+            });
+        }
+        state.forceStickToBottom = false;
         return;
     }
 
     els.chatScroll.innerHTML = list
         .map((m) => {
-            const content = String(m.content || "").replace(/</g, "&lt;");
+            const content = escapeHtml(m.content || "");
             return `
                 <article class="msg ${m.role || "assistant"}">
                     <div>${content}</div>
@@ -232,7 +273,13 @@ function renderMessages() {
         })
         .join("");
 
-    els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+    state.lastMessageSignature = signature;
+    if (shouldStick) {
+        requestAnimationFrame(() => {
+            els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+        });
+    }
+    state.forceStickToBottom = false;
 }
 
 function renderSummary() {
@@ -259,6 +306,28 @@ function applySpeedMode(mode) {
     }
 }
 
+function applyKeyboardInset() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const raw = window.innerHeight - vv.height - vv.offsetTop;
+    const keyboardPx = Math.max(0, Math.round(raw));
+    if (keyboardPx === state.keyboardOffsetPx) return;
+
+    state.keyboardOffsetPx = keyboardPx;
+    document.documentElement.style.setProperty("--keyboard-offset", `${keyboardPx}px`);
+    document.body.classList.toggle("keyboard-open", keyboardPx > 80);
+    if (keyboardPx > 0) state.forceStickToBottom = true;
+}
+
+function scheduleViewportSync() {
+    requestAnimationFrame(() => {
+        applyKeyboardInset();
+        if (state.forceStickToBottom || isNearBottom()) {
+            els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+        }
+    });
+}
+
 function renderAll() {
     renderStage();
     renderSparks();
@@ -266,7 +335,7 @@ function renderAll() {
     renderSummary();
     renderConsentOverlay();
     autosizeInput();
-    setBusy(false);
+    updateComposerAvailability();
 }
 
 async function loadModelConfig() {
@@ -343,6 +412,8 @@ async function submitConsent(agreed) {
             progress: res.progress,
             messages: res.messages
         };
+        state.busy = false;
+        state.forceStickToBottom = true;
         renderAll();
         showToast(agreed ? "已同意，开始访谈" : "已记录不同意，本次访谈结束");
     } catch (err) {
@@ -373,6 +444,8 @@ async function sendMessage() {
             progress: res.progress,
             messages: res.messages
         };
+        state.busy = false;
+        state.forceStickToBottom = true;
         renderAll();
         if (res.result?.can_advance) showToast("当前阶段信息达标，可进入下一阶段");
     } catch (err) {
@@ -392,6 +465,8 @@ async function advanceStage() {
             progress: res.progress,
             messages: res.messages
         };
+        state.busy = false;
+        state.forceStickToBottom = true;
         renderAll();
         showToast("已进入下一阶段");
     } catch (err) {
@@ -411,6 +486,7 @@ async function generateSummary() {
             progress: res.progress,
             messages: res.messages
         };
+        state.busy = false;
         renderAll();
         showToast("已生成草稿（可继续访谈）");
     } catch (err) {
@@ -452,6 +528,8 @@ function bindEvents() {
             const snippet = chip.dataset.chip || chip.textContent || "";
             const current = els.userInput.value.trim();
             els.userInput.value = current ? `${current}\n${snippet}` : snippet;
+            autosizeInput();
+            updateComposerAvailability();
             els.userInput.focus();
             return;
         }
@@ -480,7 +558,20 @@ function bindEvents() {
         }, 560);
     });
 
-    els.userInput.addEventListener("input", autosizeInput);
+    els.userInput.addEventListener("input", () => {
+        autosizeInput();
+        updateComposerAvailability();
+    });
+    els.userInput.addEventListener("focus", scheduleViewportSync);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", scheduleViewportSync);
+        window.visualViewport.addEventListener("scroll", scheduleViewportSync);
+    }
+    window.addEventListener("resize", scheduleViewportSync);
+    window.addEventListener("orientationchange", () => {
+        setTimeout(scheduleViewportSync, 80);
+    });
 }
 
 async function bootstrap() {
@@ -495,7 +586,10 @@ async function bootstrap() {
     try {
         await Promise.all([joinSession(), loadModelConfig()]);
         await refreshState();
+        state.busy = false;
+        state.forceStickToBottom = true;
         renderAll();
+        scheduleViewportSync();
     } catch (err) {
         showToast(String(err.message || err), true);
         setBusy(false);
