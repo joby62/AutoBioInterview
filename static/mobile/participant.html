@@ -21,13 +21,14 @@
                 <span class="badge token" id="tokenBadge">会话 --</span>
             </div>
             <h2 id="stageTitle">等待同意开始</h2>
-            <p id="stageGoal">同意后进入正式访谈。</p>
-            <div class="hint-tags" id="stageHints"></div>
         </div>
 
+        <div class="chat-scroll" id="chatScroll"></div>
+    </section>
+
+    <section class="composer-dock" aria-label="composer dock">
         <div class="chat-toolbar">
             <button class="mode-pill" id="speedMenuBtn" type="button" aria-haspopup="true" aria-expanded="false">⚡ 快速</button>
-            <button class="ghost-btn" id="shuffleSparkBtn" type="button">换灵感</button>
             <div class="spark-tags" id="sparkList"></div>
 
             <div class="speed-menu hidden" id="speedMenu" role="menu" aria-label="思考速度">
@@ -49,13 +50,13 @@
             </div>
         </div>
 
-        <div class="chat-scroll" id="chatScroll"></div>
-
         <div class="composer">
-            <textarea id="userInput" placeholder="输入回答。双击 Enter 发送；Shift+Enter 换行。"></textarea>
+            <div class="input-row">
+                <textarea id="userInput" placeholder="输入回答。双击 Enter 发送；Shift+Enter 换行。"></textarea>
+                <button class="send-btn" id="sendBtn" type="button">发送</button>
+            </div>
             <div class="composer-footer">
                 <span id="composerHint">准备开始</span>
-                <button class="send-btn" id="sendBtn" type="button">发送</button>
             </div>
             <div class="composer-actions">
                 <button class="action-btn" id="advanceBtn" type="button">下一阶段</button>

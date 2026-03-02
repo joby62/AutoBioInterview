@@ -81,10 +81,7 @@ const els = {
     tokenBadge: document.getElementById("tokenBadge"),
     progressBadge: document.getElementById("progressBadge"),
     stageTitle: document.getElementById("stageTitle"),
-    stageGoal: document.getElementById("stageGoal"),
-    stageHints: document.getElementById("stageHints"),
     sparkList: document.getElementById("sparkList"),
-    shuffleSparkBtn: document.getElementById("shuffleSparkBtn"),
     chatScroll: document.getElementById("chatScroll"),
     composerHint: document.getElementById("composerHint"),
     userInput: document.getElementById("userInput"),
@@ -218,15 +215,10 @@ function renderStage() {
 
     if (!conf) {
         els.stageTitle.textContent = stage === "consent_pending" ? "等待同意开始" : stageLabel(stage);
-        els.stageGoal.textContent = stage === "consent_pending" ? "点击同意后进入正式访谈。" : "当前阶段可继续查看历史信息。";
-        els.stageHints.innerHTML = "";
         return;
     }
 
     els.stageTitle.textContent = conf.title || stageLabel(stage);
-    els.stageGoal.textContent = conf.goal || "";
-    const hints = Array.isArray(conf.prompt_hints) ? conf.prompt_hints.slice(0, 2) : [];
-    els.stageHints.innerHTML = hints.map((h) => `<span class="hint-chip">${String(h).replace(/</g, "&lt;")}</span>`).join("");
 
     const ps = stageProgress(stage);
     const turns = Number(ps.turns || 0);
@@ -238,16 +230,14 @@ function renderSparks() {
     const stage = state.payload?.session?.stage;
     if (!ACTIVE_STAGES.includes(stage)) {
         els.sparkList.innerHTML = "";
-        els.shuffleSparkBtn.disabled = true;
         return;
     }
 
     const pool = SPARK_POOL[stage] || [];
-    const sample = shuffle(pool).slice(0, Math.min(3, pool.length));
+    const sample = shuffle(pool).slice(0, Math.min(2, pool.length));
     els.sparkList.innerHTML = sample
         .map((spark) => `<button class="spark-chip" type="button" data-chip="${spark.replace(/"/g, "&quot;")}">${spark}</button>`)
         .join("");
-    els.shuffleSparkBtn.disabled = state.busy;
 }
 
 function renderMessages() {
@@ -470,7 +460,6 @@ function bindEvents() {
     els.summaryBtn.addEventListener("click", generateSummary);
     els.consentAgreeBtn.addEventListener("click", () => submitConsent(true));
     els.consentDeclineBtn.addEventListener("click", () => submitConsent(false));
-    els.shuffleSparkBtn.addEventListener("click", renderSparks);
 
     els.speedMenuBtn.addEventListener("click", (event) => {
         event.stopPropagation();
