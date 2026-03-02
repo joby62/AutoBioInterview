@@ -9,20 +9,10 @@
 <body>
 <div class="mobile-shell">
     <header class="mobile-titlebar">
-        <p class="tiny-kicker">DIGITAL LEARNING INTERVIEW</p>
         <h1>数字学习自传访谈</h1>
     </header>
 
     <section class="chat-card" aria-label="mobile interview chat">
-        <div class="chat-top">
-            <div class="meta-row">
-                <span class="badge stage" id="stageBadge">待同意</span>
-                <span class="badge" id="progressBadge">0%</span>
-                <span class="badge token" id="tokenBadge">会话 --</span>
-            </div>
-            <h2 id="stageTitle">等待同意开始</h2>
-        </div>
-
         <div class="chat-scroll" id="chatScroll"></div>
     </section>
 
@@ -51,16 +41,20 @@
         </div>
 
         <div class="composer">
-            <div class="input-row">
+            <div class="input-wrap">
                 <textarea id="userInput" placeholder="输入回答。双击 Enter 发送；Shift+Enter 换行。"></textarea>
-                <button class="send-btn" id="sendBtn" type="button">发送</button>
+                <button class="send-btn" id="sendBtn" type="button" aria-label="发送">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 4a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V5a1 1 0 0 1 1-1z"/>
+                    </svg>
+                </button>
             </div>
-            <div class="composer-footer">
+            <div class="dock-meta">
                 <span id="composerHint">准备开始</span>
-            </div>
-            <div class="composer-actions">
-                <button class="action-btn" id="advanceBtn" type="button">下一阶段</button>
-                <button class="action-btn secondary" id="summaryBtn" type="button">生成草稿</button>
+                <div class="mini-actions">
+                    <button class="mini-btn" id="advanceBtn" type="button">下一阶段</button>
+                    <button class="mini-btn secondary" id="summaryBtn" type="button">草稿</button>
+                </div>
             </div>
         </div>
     </section>

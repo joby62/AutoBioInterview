@@ -1,18 +1,5 @@
 const ACTIVE_STAGES = ["daily", "evolution", "experience", "difficulty", "impact", "wrapup"];
 
-const STAGE_LABELS = {
-    consent_pending: "待同意",
-    daily: "日常场景",
-    evolution: "变化节点",
-    experience: "体验感受",
-    difficulty: "阻碍与应对",
-    impact: "影响与反思",
-    wrapup: "收尾补充",
-    review: "草稿审阅",
-    done: "定稿完成",
-    withdrawn: "已撤回"
-};
-
 const SPARK_POOL = {
     daily: [
         "最近一次是____，在____学了____分钟。",
@@ -77,10 +64,6 @@ const state = {
 };
 
 const els = {
-    stageBadge: document.getElementById("stageBadge"),
-    tokenBadge: document.getElementById("tokenBadge"),
-    progressBadge: document.getElementById("progressBadge"),
-    stageTitle: document.getElementById("stageTitle"),
     sparkList: document.getElementById("sparkList"),
     chatScroll: document.getElementById("chatScroll"),
     composerHint: document.getElementById("composerHint"),
@@ -98,10 +81,6 @@ const els = {
 };
 
 const speedOptionEls = Array.from(document.querySelectorAll(".speed-option"));
-
-function stageLabel(stage) {
-    return STAGE_LABELS[stage] || stage;
-}
 
 function modelToMode(model) {
     const name = String(model || "").toLowerCase();
@@ -160,6 +139,13 @@ async function api(path, options = {}) {
     return data;
 }
 
+function autosizeInput() {
+    const el = els.userInput;
+    el.style.height = "46px";
+    const next = Math.max(46, Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.3)));
+    el.style.height = `${next}px`;
+}
+
 function shuffle(input) {
     const arr = [...input];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -199,31 +185,19 @@ function progressPercent() {
     return Math.round(Math.min(99, base + chunk * stageRatio));
 }
 
-function renderHeader() {
-    const session = state.payload?.session;
-    const stage = session?.stage || "consent_pending";
-    const token = session?.participant_token || "";
-
-    els.stageBadge.textContent = stageLabel(stage);
-    els.progressBadge.textContent = `${progressPercent()}%`;
-    els.tokenBadge.textContent = token ? `会话 ${token.slice(0, 8)}` : "会话 --";
-}
-
 function renderStage() {
     const stage = state.payload?.session?.stage || "consent_pending";
     const conf = currentStageConfig();
 
     if (!conf) {
-        els.stageTitle.textContent = stage === "consent_pending" ? "等待同意开始" : stageLabel(stage);
+        els.composerHint.textContent = stage === "consent_pending" ? "等待同意后开始访谈" : "可继续输入并发送";
         return;
     }
-
-    els.stageTitle.textContent = conf.title || stageLabel(stage);
 
     const ps = stageProgress(stage);
     const turns = Number(ps.turns || 0);
     const chars = Number(ps.chars || 0);
-    els.composerHint.textContent = `阶段进度：${turns}/${conf.min_turns}轮 · ${chars}/${conf.min_chars}字`;
+    els.composerHint.textContent = `${progressPercent()}% · ${turns}/${conf.min_turns}轮 · ${chars}/${conf.min_chars}字`;
 }
 
 function renderSparks() {
@@ -250,11 +224,9 @@ function renderMessages() {
     els.chatScroll.innerHTML = list
         .map((m) => {
             const role = m.role || "assistant";
-            const ts = (m.created_at || "").replace("T", " ").slice(0, 16);
             const content = String(m.content || "").replace(/</g, "&lt;");
             return `
                 <article class="msg ${role}">
-                    <div class="role">${role} · ${ts}</div>
                     <div>${content}</div>
                 </article>
             `;
@@ -289,12 +261,12 @@ function applySpeedMode(mode) {
 }
 
 function renderAll() {
-    renderHeader();
     renderStage();
     renderSparks();
     renderMessages();
     renderSummary();
     renderConsentOverlay();
+    autosizeInput();
     setBusy(false);
 }
 
@@ -395,6 +367,7 @@ async function sendMessage() {
             body: JSON.stringify({ content })
         });
         els.userInput.value = "";
+        autosizeInput();
         state.payload = {
             session: res.session,
             template: res.template,
@@ -507,6 +480,8 @@ function bindEvents() {
             if (Date.now() - state.enterPrimedAt >= 520) state.enterPrimedAt = 0;
         }, 560);
     });
+
+    els.userInput.addEventListener("input", autosizeInput);
 }
 
 async function bootstrap() {
