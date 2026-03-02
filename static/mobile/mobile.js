@@ -223,10 +223,9 @@ function renderMessages() {
 
     els.chatScroll.innerHTML = list
         .map((m) => {
-            const role = m.role || "assistant";
             const content = String(m.content || "").replace(/</g, "&lt;");
             return `
-                <article class="msg ${role}">
+                <article class="msg ${m.role || "assistant"}">
                     <div>${content}</div>
                 </article>
             `;
