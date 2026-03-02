@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+interviews.db
+*.db
+.DS_Store

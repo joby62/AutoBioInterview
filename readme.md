@@ -5,7 +5,7 @@
 - 发起者端（Researcher）：上传邀请函，AI 生成访谈模板，查看会话与总结，导出内容。
 - 受访者端（Participant）：通过邀请链接进入访谈，同意一次后可持续续聊，刷新不丢进度。
 
-> 当前仓库仅保留一个运行版本：`uvicorn app:app ...`。  
+> 当前仓库仅保留一个运行版本：`uvicorn app:app ...`。
 > 研究者端与受访者端共用同一套当前产品代码与数据链路。
 
 ## 核心能力
@@ -30,15 +30,17 @@
 - 所有研究者账号都可查看该示例项目、会话内容与导出结果
 - 示例受访者链接：`/participant/sample`
 
-4. 数据留存与导出
+5. 数据留存与导出
 - 对话、阶段进度、总结全部入库
 - 发起者可导出单会话 JSON/TXT
 
 ## 技术栈
 
 - FastAPI
-- SQLite（默认，后续可迁移 PostgreSQL）
+- SQLite（默认，可后续迁移 PostgreSQL）
 - OpenAI Python SDK（配置为豆包 Ark 兼容接口）
+- Docker / Docker Compose
+- Caddy（反向代理 + HTTPS）
 
 ## 目录结构
 
@@ -66,46 +68,208 @@ static/
   app.js
   participant.css
   styles.css
+deploy/
+  caddy/
+    Caddyfile.dev
+    Caddyfile.prod
+Dockerfile
+docker-compose.dev.yml
+docker-compose.prod.yml
 ```
 
 ## 环境变量
 
-在 `.env` 中设置：
+复制模板：
+
+```bash
+cp .env.example .env
+```
+
+`.env` 至少配置以下项：
 
 ```env
-ARK_API_KEY=你的豆包兼容 key
+ARK_API_KEY=你的豆包兼容key
 ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 
-# 可选：/model-config 可选模型列表（建议包含 mini/lite/pro）
+# 生产环境域名（给 Caddy 自动签发 HTTPS 证书）
+APP_DOMAIN=your.domain.com
+
+# 可选：开发环境对外端口（默认 8004）
+DEV_HTTP_PORT=8004
+
+# 可选：prod uvicorn worker 数（默认 2）
+UVICORN_WORKERS=2
+
+# 可选：/model-config 可选模型列表（建议 mini/lite/pro）
 ARK_MODEL_CHOICES=doubao-seed-2-0-mini-260215,doubao-seed-2-0-lite-260215,doubao-seed-2-0-pro-260215
 
-# 启动时的初始生效模型（系统不会在失败时自动切模型重试）
+# 启动时初始生效模型（失败时不会自动切模型重试）
 MODEL_ORCH=doubao-seed-2-0-mini-260215
 MODEL_WRITE=doubao-seed-2-0-lite-260215
-
-# 兼容旧命名（可选）：等价于上面的初始模型别名
-# ARK_MODEL_DEFAULT=doubao-seed-2-0-mini-260215
-# ARK_MODEL_FALLBACK=doubao-seed-2-0-lite-260215
 
 DB_PATH=./interviews.db
 ```
 
-可直接复制：`cp .env.example .env`
-
-## 本地运行
+## 本地直接运行（非 Docker）
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8002 --reload
+uvicorn app:app --host 0.0.0.0 --port 8004 --reload
 ```
 
 访问：
 
-- 发起者控制台: `http://127.0.0.1:8002/researcher`
-- 受访者页面: `http://127.0.0.1:8002/participant/{invite_code}`
-- 示例受访者页面: `http://127.0.0.1:8002/participant/sample`
+- 发起者控制台: `http://127.0.0.1:8004/researcher`
+- 受访者页面: `http://127.0.0.1:8004/participant/{invite_code}`
+- 示例受访者页面: `http://127.0.0.1:8004/participant/sample`
+- 健康检查: `http://127.0.0.1:8004/healthz`
 
-健康检查（含模型与 key 读取状态）：
-- `http://127.0.0.1:8002/healthz`
+## Docker 开发模式（热更新）
+
+此模式用于你在服务器或本机上持续改代码，前端/后端改动自动生效。
+
+1. 启动
+
+```bash
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+2. 查看日志
+
+```bash
+docker compose -f docker-compose.dev.yml logs -f app
+docker compose -f docker-compose.dev.yml logs -f caddy
+```
+
+3. 访问
+
+- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/researcher`
+- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/participant/sample`
+- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/healthz`
+
+4. 停止
+
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+说明：
+- dev 使用 `uvicorn --reload`。
+- 代码目录以 volume 方式挂载到容器，实现热更新。
+- 数据库存储在 volume `autobio_dev_data`，不会随容器重建丢失。
+
+## Docker 生产模式（稳定版）
+
+此模式用于长期稳定运行，带 Caddy HTTPS 反向代理。
+
+### 前置条件
+
+1. 服务器已安装 Docker Engine + Docker Compose Plugin。
+2. 域名 `APP_DOMAIN` 的 A 记录已指向服务器公网 IP。
+3. 服务器放行 `80/443` 端口（防火墙/安全组）。
+4. `.env` 中已设置正确的 `APP_DOMAIN` 和 `ARK_API_KEY`。
+
+### 启动 prod
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+检查状态：
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs -f app
+docker compose -f docker-compose.prod.yml logs -f caddy
+```
+
+访问：
+
+- `https://<APP_DOMAIN>/researcher`
+- `https://<APP_DOMAIN>/participant/sample`
+- `https://<APP_DOMAIN>/healthz`
+
+说明：
+- app 容器使用 `uvicorn --workers ${UVICORN_WORKERS:-2}`。
+- caddy 容器负责反代到 app:8000，并自动申请/续期 HTTPS 证书。
+- SQLite 数据在 volume `autobio_prod_data`。
+- Caddy 证书与配置在 volume `caddy_data`、`caddy_config`。
+
+## 服务器重启后自动恢复
+
+本项目 compose 已使用 `restart: unless-stopped`，只要 Docker 服务随系统启动，容器会自动拉起。
+
+在 Ubuntu/Debian 上建议执行一次：
+
+```bash
+sudo systemctl enable docker
+sudo systemctl restart docker
+```
+
+验证：
+
+```bash
+sudo reboot
+# 机器重启后再登录
+cd /path/to/AutoBioInterview
+docker compose -f docker-compose.prod.yml ps
+```
+
+## 升级与回滚
+
+### 升级（拉代码并重建）
+
+```bash
+cd /path/to/AutoBioInterview
+git pull origin main
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+### 回滚到某个提交
+
+```bash
+cd /path/to/AutoBioInterview
+git checkout <commit_sha>
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+## 数据备份（SQLite）
+
+1. 找到数据卷名：
+
+```bash
+docker volume ls | grep autobio_prod_data
+```
+
+2. 导出数据库（示例）：
+
+```bash
+mkdir -p backup
+docker run --rm \
+  -v autobiointerview_autobio_prod_data:/data \
+  -v "$PWD/backup":/backup \
+  alpine sh -c 'cp /data/interviews.db /backup/interviews-$(date +%F-%H%M%S).db'
+```
+
+> `autobiointerview_autobio_prod_data` 这个名字会受目录名影响，以你机器实际 volume 名为准。
+
+## 常用运维命令
+
+```bash
+# 查看容器状态
+docker compose -f docker-compose.prod.yml ps
+
+# 重启服务
+docker compose -f docker-compose.prod.yml restart
+
+# 仅重启 app
+docker compose -f docker-compose.prod.yml restart app
+
+# 跟踪日志
+docker compose -f docker-compose.prod.yml logs -f --tail=200
+
+# 停止并移除容器（不删 volume）
+docker compose -f docker-compose.prod.yml down
+```
 
 ## 主要 API
 
@@ -143,11 +307,3 @@ uvicorn app:app --host 0.0.0.0 --port 8002 --reload
 - `POST /revise-final`
 - `POST /approve-final`
 - `GET /export`
-
-## 生产部署建议
-
-1. 数据库迁移到 PostgreSQL
-2. `secure=True` Cookie + HTTPS 域名
-3. 接入 Nginx + Uvicorn/Gunicorn
-4. 增加审计日志备份与导出权限控制
-5. 发起者账号可接学校统一认证（SSO/OAuth）
