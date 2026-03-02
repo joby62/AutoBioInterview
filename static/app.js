@@ -86,6 +86,9 @@ const state = {
     progressLastDragAt: 0,
     progressLastInteractionAt: 0,
     rightsNoticeShown: false,
+    progressPct: 0,
+    fabDisplayMode: "percent",
+    fabDisplayTimer: null,
     fabX: null,
     fabY: null
 };
@@ -310,10 +313,15 @@ function applyFabPosition() {
     const vh = window.innerHeight;
     const maxX = Math.max(FAB_MARGIN, vw - size - FAB_MARGIN);
     const maxY = Math.max(FAB_MARGIN, vh - size - FAB_MARGIN);
+    const preferredInset = Math.min(52, Math.max(24, Math.round(vw * 0.035)));
 
     if (!Number.isFinite(state.fabX) || !Number.isFinite(state.fabY)) {
-        state.fabX = maxX;
+        state.fabX = Math.max(FAB_MARGIN, maxX - preferredInset);
         state.fabY = maxY;
+    }
+
+    if (state.fabX > maxX - 8) {
+        state.fabX = Math.max(FAB_MARGIN, maxX - preferredInset);
     }
 
     state.fabX = clamp(state.fabX, FAB_MARGIN, maxX);
@@ -331,29 +339,10 @@ function placeProgressPanelNearFab() {
     const panelRect = panel.getBoundingClientRect();
     const panelWidth = panelRect.width || Math.min(700, window.innerWidth - 28);
     const panelHeight = panelRect.height || 240;
-    const topbar = document.querySelector(".topbar");
-    const topbarRect = topbar ? topbar.getBoundingClientRect() : null;
-    const shellRect = els.appShell ? els.appShell.getBoundingClientRect() : null;
     const size = fabSizePx();
     const margin = 10;
     const anchorX = (state.fabX ?? 0) + size * 0.5;
     const anchorY = (state.fabY ?? 0) + size * 0.5;
-
-    if (!state.progressFabMoved && topbarRect) {
-        const topGap = 6;
-        const topMin = shellRect ? shellRect.top + 2 : margin;
-        const top = clamp(topbarRect.bottom + topGap, topMin, Math.max(topMin, window.innerHeight - panelHeight - margin));
-        const left = clamp(
-            window.innerWidth - panelWidth - margin,
-            margin,
-            Math.max(margin, window.innerWidth - panelWidth - margin)
-        );
-        panel.style.left = `${left}px`;
-        panel.style.top = `${top}px`;
-        panel.style.right = "auto";
-        panel.style.bottom = "auto";
-        return;
-    }
 
     let left = anchorX - panelWidth + size * 0.55;
     let top = anchorY - panelHeight - size * 0.6;

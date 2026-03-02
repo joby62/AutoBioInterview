@@ -603,6 +603,17 @@ textarea:focus {
     font-size: 13px;
     font-weight: 800;
     letter-spacing: -0.02em;
+    transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.progress-fab.show-stage .fab-pct {
+    font-size: 12px;
+    letter-spacing: 0;
+}
+
+.progress-fab.fab-switching .fab-pct {
+    opacity: 0;
+    transform: translateY(2px) scale(0.94);
 }
 
 .progress-head {

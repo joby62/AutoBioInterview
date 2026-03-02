@@ -211,7 +211,9 @@ function renderProgressSummary() {
     const bubblePct = Math.min(94, Math.max(6, pct));
     els.progressBubble.textContent = bubbleLabel;
     els.progressBubble.style.left = `${bubblePct}%`;
-    els.progressFabPct.textContent = `${pct}%`;
+    state.progressPct = pct;
+    ensureFabTicker();
+    updateFabTickerText();
     els.progressFab.style.setProperty("--fab-progress", `${pct}`);
     els.progressFab.style.setProperty("--fab-color", theme.end);
 
@@ -228,6 +230,25 @@ function renderProgressSummary() {
     }
 
     placeProgressPanelNearFab();
+}
+
+function updateFabTickerText() {
+    const stageLabel = TRACK_LABELS[state.stage] || STAGE_NAMES[state.stage] || "进度";
+    const text = state.fabDisplayMode === "stage" ? stageLabel : `${Math.round(state.progressPct || 0)}%`;
+    els.progressFabPct.textContent = text;
+    els.progressFab.classList.toggle("show-stage", state.fabDisplayMode === "stage");
+}
+
+function ensureFabTicker() {
+    if (state.fabDisplayTimer) return;
+    state.fabDisplayTimer = setInterval(() => {
+        state.fabDisplayMode = state.fabDisplayMode === "percent" ? "stage" : "percent";
+        els.progressFab.classList.add("fab-switching");
+        setTimeout(() => {
+            els.progressFab.classList.remove("fab-switching");
+            updateFabTickerText();
+        }, 140);
+    }, 2600);
 }
 
 function renderHeaderMeta() {
