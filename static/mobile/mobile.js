@@ -15,52 +15,40 @@ const STAGE_LABELS = {
 
 const SPARK_POOL = {
     daily: [
-        "最近一次是____，我在____学了____分钟。",
+        "最近一次是____，在____学了____分钟。",
         "我通常在____这个时间段学习。",
-        "那次学习的地点是____，周围环境是____。",
-        "我最常用的平台是____，主要学____。",
         "那次最投入的一段是____。",
-        "我一般先____，再____。"
+        "我最常用的平台是____。"
     ],
     evolution: [
-        "变化发生在____之后，因为____。",
-        "以前我主要____，现在更重视____。",
-        "让我下决心改变的是____。",
-        "那次节点前后最大的差异是____。",
-        "我删掉了____，保留了____。",
+        "变化发生在____之后。",
+        "以前____，现在____。",
+        "让我改变的关键事件是____。",
         "变化稳定下来用了____周。"
     ],
     experience: [
-        "当时我的情绪从____变到____。",
+        "当时情绪从____变到____。",
         "最难忘的是____，因为____。",
         "我最容易焦虑的时刻是____。",
-        "让我有成就感的是____。",
-        "学完后身体感觉是____。",
-        "那次体验让我意识到____。"
+        "这次体验让我意识到____。"
     ],
     difficulty: [
         "我最大的困难是____。",
         "我用____来减少分心。",
         "当计划被打断时，我会____。",
-        "目前最稳的策略是____。",
-        "这招带来的效果是____。",
-        "它的副作用是____，我在调整____。"
+        "当前最稳的策略是____。"
     ],
     impact: [
-        "它影响了我的作息：以前____，现在____。",
+        "它影响了我的作息：____。",
         "对工作最直接的收益是____。",
-        "我和____的互动发生了____变化。",
-        "学习带来的成本是____，回报是____。",
-        "长期看，我更像一个____的人。",
-        "如果回到起点，我会先做____。"
+        "学习的成本是____，回报是____。",
+        "长期看我更像一个____的人。"
     ],
     wrapup: [
-        "还有一段经历我希望写进自传：____。",
-        "请重点保留____这段内容。",
-        "请删去/弱化____这部分。",
-        "如果只能留一句话，我希望是____。",
-        "整体总结：____。",
-        "我没有更多补充，可以进入草稿阶段。"
+        "我最想保留的一段是____。",
+        "请重点强调____。",
+        "如果只能留一句话：____。",
+        "整体总结：____。"
     ]
 };
 
@@ -68,6 +56,12 @@ const SPEED_MODEL_HINT = {
     fast: "mini",
     balanced: "lite",
     deep: "pro"
+};
+
+const SPEED_LABEL = {
+    fast: "快速",
+    balanced: "中庸",
+    deep: "深度"
 };
 
 const state = {
@@ -78,7 +72,8 @@ const state = {
     enterPrimedAt: 0,
     speedMode: "fast",
     availableModels: [],
-    modelConfig: null
+    modelConfig: null,
+    speedMenuOpen: false
 };
 
 const els = {
@@ -100,12 +95,12 @@ const els = {
     consentOverlay: document.getElementById("consentOverlay"),
     consentAgreeBtn: document.getElementById("consentAgreeBtn"),
     consentDeclineBtn: document.getElementById("consentDeclineBtn"),
-    speedFastBtn: document.getElementById("speedFastBtn"),
-    speedBalancedBtn: document.getElementById("speedBalancedBtn"),
-    speedDeepBtn: document.getElementById("speedDeepBtn"),
-    speedHint: document.getElementById("speedHint"),
+    speedMenuBtn: document.getElementById("speedMenuBtn"),
+    speedMenu: document.getElementById("speedMenu"),
     toast: document.getElementById("toast")
 };
+
+const speedOptionEls = Array.from(document.querySelectorAll(".speed-option"));
 
 function stageLabel(stage) {
     return STAGE_LABELS[stage] || stage;
@@ -155,15 +150,9 @@ function showToast(text, error = false) {
 
 async function api(path, options = {}) {
     const headers = { ...(options.headers || {}) };
-    if (options.body !== undefined) {
-        headers["Content-Type"] = "application/json";
-    }
+    if (options.body !== undefined) headers["Content-Type"] = "application/json";
 
-    const res = await fetch(path, {
-        ...options,
-        headers
-    });
-
+    const res = await fetch(path, { ...options, headers });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
         const detail = data?.detail;
@@ -224,8 +213,7 @@ function renderHeader() {
 }
 
 function renderStage() {
-    const session = state.payload?.session;
-    const stage = session?.stage || "consent_pending";
+    const stage = state.payload?.session?.stage || "consent_pending";
     const conf = currentStageConfig();
 
     if (!conf) {
@@ -237,13 +225,13 @@ function renderStage() {
 
     els.stageTitle.textContent = conf.title || stageLabel(stage);
     els.stageGoal.textContent = conf.goal || "";
-    const hints = Array.isArray(conf.prompt_hints) ? conf.prompt_hints.slice(0, 6) : [];
-    els.stageHints.innerHTML = hints.map((h) => `<span class="chip">${String(h).replace(/</g, "&lt;")}</span>`).join("");
+    const hints = Array.isArray(conf.prompt_hints) ? conf.prompt_hints.slice(0, 2) : [];
+    els.stageHints.innerHTML = hints.map((h) => `<span class="hint-chip">${String(h).replace(/</g, "&lt;")}</span>`).join("");
 
     const ps = stageProgress(stage);
     const turns = Number(ps.turns || 0);
     const chars = Number(ps.chars || 0);
-    els.composerHint.textContent = `本阶段进度：${turns}/${conf.min_turns} 轮，${chars}/${conf.min_chars} 字`;
+    els.composerHint.textContent = `阶段进度：${turns}/${conf.min_turns}轮 · ${chars}/${conf.min_chars}字`;
 }
 
 function renderSparks() {
@@ -255,7 +243,7 @@ function renderSparks() {
     }
 
     const pool = SPARK_POOL[stage] || [];
-    const sample = shuffle(pool).slice(0, Math.min(6, pool.length));
+    const sample = shuffle(pool).slice(0, Math.min(3, pool.length));
     els.sparkList.innerHTML = sample
         .map((spark) => `<button class="spark-chip" type="button" data-chip="${spark.replace(/"/g, "&quot;")}">${spark}</button>`)
         .join("");
@@ -296,14 +284,18 @@ function renderConsentOverlay() {
     els.consentOverlay.classList.toggle("visible", stage === "consent_pending");
 }
 
+function setSpeedMenu(open) {
+    state.speedMenuOpen = open;
+    els.speedMenu.classList.toggle("hidden", !open);
+    els.speedMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
 function applySpeedMode(mode) {
     state.speedMode = mode;
-    els.speedFastBtn.classList.toggle("active", mode === "fast");
-    els.speedBalancedBtn.classList.toggle("active", mode === "balanced");
-    els.speedDeepBtn.classList.toggle("active", mode === "deep");
-
-    const label = mode === "deep" ? "深度" : (mode === "balanced" ? "中庸" : "快速");
-    els.speedHint.textContent = `当前：${label}`;
+    els.speedMenuBtn.textContent = `⚡ ${SPEED_LABEL[mode] || "快速"}`;
+    for (const option of speedOptionEls) {
+        option.classList.toggle("active", option.dataset.speed === mode);
+    }
 }
 
 function renderAll() {
@@ -420,9 +412,7 @@ async function sendMessage() {
             messages: res.messages
         };
         renderAll();
-        if (res.result?.can_advance) {
-            showToast("当前阶段信息达标，可进入下一阶段");
-        }
+        if (res.result?.can_advance) showToast("当前阶段信息达标，可进入下一阶段");
     } catch (err) {
         showToast(String(err.message || err), true);
         setBusy(false);
@@ -460,7 +450,7 @@ async function generateSummary() {
             messages: res.messages
         };
         renderAll();
-        showToast("已生成草稿");
+        showToast("已生成草稿（可继续访谈）");
     } catch (err) {
         showToast(String(err.message || err), true);
         setBusy(false);
@@ -482,17 +472,32 @@ function bindEvents() {
     els.consentDeclineBtn.addEventListener("click", () => submitConsent(false));
     els.shuffleSparkBtn.addEventListener("click", renderSparks);
 
-    els.speedFastBtn.addEventListener("click", () => changeSpeed("fast"));
-    els.speedBalancedBtn.addEventListener("click", () => changeSpeed("balanced"));
-    els.speedDeepBtn.addEventListener("click", () => changeSpeed("deep"));
+    els.speedMenuBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setSpeedMenu(!state.speedMenuOpen);
+    });
+
+    for (const option of speedOptionEls) {
+        option.addEventListener("click", async () => {
+            const mode = option.dataset.speed;
+            setSpeedMenu(false);
+            await changeSpeed(mode);
+        });
+    }
 
     document.addEventListener("click", (event) => {
         const chip = event.target.closest(".spark-chip");
-        if (!chip || state.busy) return;
-        const snippet = chip.dataset.chip || chip.textContent || "";
-        const current = els.userInput.value.trim();
-        els.userInput.value = current ? `${current}\n${snippet}` : snippet;
-        els.userInput.focus();
+        if (chip && !state.busy) {
+            const snippet = chip.dataset.chip || chip.textContent || "";
+            const current = els.userInput.value.trim();
+            els.userInput.value = current ? `${current}\n${snippet}` : snippet;
+            els.userInput.focus();
+            return;
+        }
+
+        if (state.speedMenuOpen && !event.target.closest("#speedMenu") && !event.target.closest("#speedMenuBtn")) {
+            setSpeedMenu(false);
+        }
     });
 
     els.userInput.addEventListener("keydown", (event) => {
