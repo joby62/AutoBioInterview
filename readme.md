@@ -5,6 +5,9 @@
 - 发起者端（Researcher）：上传邀请函，AI 生成访谈模板，查看会话与总结，导出内容。
 - 受访者端（Participant）：通过邀请链接进入访谈，同意一次后可持续续聊，刷新不丢进度。
 
+> 当前仓库仅保留一个运行版本：`uvicorn app:app ...`。  
+> 受访者界面采用“原版交互设计”，后端接入新版研究者与数据模块。
+
 ## 核心能力
 
 1. 发起者账号体系
@@ -47,6 +50,7 @@ autobio_app/
     auth.py
     researcher.py
     participant.py
+    participant_compat.py
   services/
     researcher.py
     participant.py
@@ -54,7 +58,8 @@ static/
   researcher.html
   researcher.js
   participant.html
-  participant.js
+  app.js
+  participant.css
   styles.css
 ```
 
@@ -103,6 +108,20 @@ uvicorn app:app --host 0.0.0.0 --port 8002 --reload
 - `POST /api/participant/message`
 - `POST /api/participant/advance`
 - `POST /api/participant/summary`
+
+### Participant Web（受访者页面内部调用）
+- `GET /model-config`
+- `POST /model-config`
+- `POST /interviews`
+- `POST /consent`
+- `POST /messages`
+- `POST /next`
+- `POST /skip`
+- `POST /advance-stage`
+- `POST /finalize`
+- `POST /revise-final`
+- `POST /approve-final`
+- `GET /export`
 
 ## 生产部署建议
 

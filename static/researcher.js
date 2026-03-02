@@ -5,6 +5,25 @@ const state = {
   currentSession: null,
 };
 
+const DEFAULT_PROJECT_TITLE = "中国传媒大学数字学习自传访谈";
+const DEFAULT_INVITATION_TEXT = [
+  "【数字学习自传访谈邀请函】",
+  "您好！我们正在开展“中国传媒大学数字学习自传”研究，关注学习者在数字平台中的真实学习经历。",
+  "",
+  "访谈将围绕以下内容展开：",
+  "1. 日常学习场景（平台、时间、内容、时长）；",
+  "2. 学习方式的变化节点与原因；",
+  "3. 学习过程中的体验、情绪、困难与应对；",
+  "4. 数字学习对学业、工作、生活与自我认同的影响。",
+  "",
+  "参与说明：",
+  "- 访谈约 20-35 分钟；",
+  "- 你可随时跳过问题、暂停或退出；",
+  "- 内容仅用于学术研究，发布前会进行匿名化处理。",
+  "",
+  "感谢你的参与与分享。"
+].join("\\n");
+
 const els = {
   userEmail: document.getElementById("userEmail"),
   logoutBtn: document.getElementById("logoutBtn"),
@@ -42,6 +61,15 @@ const els = {
 function setStatus(el, text, isError = false) {
   el.textContent = text || "";
   el.style.color = isError ? "#b42318" : "#1f5f9f";
+}
+
+function hydrateProjectDefaults() {
+  if (!els.projectTitle.value.trim()) {
+    els.projectTitle.value = DEFAULT_PROJECT_TITLE;
+  }
+  if (!els.invitationText.value.trim()) {
+    els.invitationText.value = DEFAULT_INVITATION_TEXT;
+  }
 }
 
 async function api(path, options = {}) {
@@ -287,7 +315,7 @@ async function createProject() {
       body: JSON.stringify({ title, invitation_text: invitationText }),
     });
     setStatus(els.projectStatus, "项目创建成功");
-    els.projectTitle.value = "";
+    els.projectTitle.value = DEFAULT_PROJECT_TITLE;
     await refreshProjects();
     await loadProject(res.project.id);
   } catch (err) {
@@ -327,6 +355,7 @@ function bindEvents() {
 }
 
 async function bootstrap() {
+  hydrateProjectDefaults();
   bindEvents();
   renderAuthState();
   renderProjects();
