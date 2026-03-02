@@ -1,10 +1,16 @@
-{
-    auto_https off
+www.{$APP_DOMAIN} {
+    redir https://{$APP_DOMAIN}{uri} 308
 }
 
-yuexuan.asia, www.yuexuan.asia, m.yuexuan.asia {
+m.{$APP_DOMAIN} {
+    redir https://{$APP_DOMAIN}{uri} 308
+}
+
+{$APP_DOMAIN} {
     encode gzip zstd
+    # Keep long-lived researcher/participant sessions over HTTPS.
     header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         Referrer-Policy "strict-origin-when-cross-origin"

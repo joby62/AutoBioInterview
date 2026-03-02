@@ -94,8 +94,8 @@ ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 # 生产环境域名（给 Caddy 自动签发 HTTPS 证书）
 APP_DOMAIN=your.domain.com
 
-# 可选：开发环境对外端口（默认 8004）
-DEV_HTTP_PORT=8004
+# 可选：开发环境对外端口（默认 5000）
+DEV_HTTP_PORT=5000
 
 # 可选：prod uvicorn worker 数（默认 2）
 UVICORN_WORKERS=2
@@ -113,15 +113,15 @@ DB_PATH=./interviews.db
 ## 本地直接运行（非 Docker）
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8004 --reload
+uvicorn app:app --host 0.0.0.0 --port 5000 --reload
 ```
 
 访问：
 
-- 发起者控制台: `http://127.0.0.1:8004/researcher`
-- 受访者页面: `http://127.0.0.1:8004/participant/{invite_code}`
-- 示例受访者页面: `http://127.0.0.1:8004/participant/sample`
-- 健康检查: `http://127.0.0.1:8004/healthz`
+- 发起者控制台: `http://127.0.0.1:5000/researcher`
+- 受访者页面: `http://127.0.0.1:5000/participant/{invite_code}`
+- 示例受访者页面: `http://127.0.0.1:5000/participant/sample`
+- 健康检查: `http://127.0.0.1:5000/healthz`
 
 ## Docker 开发模式（热更新）
 
@@ -142,9 +142,9 @@ docker compose -f docker-compose.dev.yml logs -f caddy
 
 3. 访问
 
-- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/researcher`
-- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/participant/sample`
-- `http://<服务器IP>:${DEV_HTTP_PORT:-8004}/healthz`
+- `http://<服务器IP>:${DEV_HTTP_PORT:-5000}/researcher`
+- `http://<服务器IP>:${DEV_HTTP_PORT:-5000}/participant/sample`
+- `http://<服务器IP>:${DEV_HTTP_PORT:-5000}/healthz`
 
 4. 停止
 
@@ -164,7 +164,7 @@ docker compose -f docker-compose.dev.yml down
 ### 前置条件
 
 1. 服务器已安装 Docker Engine + Docker Compose Plugin。
-2. 域名 `APP_DOMAIN` 的 A 记录已指向服务器公网 IP。
+2. 域名 `APP_DOMAIN` 的 A 记录已指向服务器公网 IP，且 `www`/`m` 子域名也已指向同一 IP（A 或 CNAME）。
 3. 服务器放行 `80/443` 端口（防火墙/安全组）。
 4. `.env` 中已设置正确的 `APP_DOMAIN` 和 `ARK_API_KEY`。
 
