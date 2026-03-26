@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>云南路线长卷 | Mobile-First Phase 1</title>
+  <meta
+    name="description"
+    content="移动端优先的云南 11 天游攻略第一阶段：摘要卡片流、底部导航、当天详情视图。"
+  />
+  <link rel="stylesheet" href="/static/guide/yunnan.css" />
+</head>
+<body>
+  <div class="top-progress" aria-hidden="true">
+    <span id="scrollProgress"></span>
+  </div>
+  <div class="page-grain" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
+    <div class="shell hero-shell">
+      <div class="hero-bar">
+        <span class="status-chip">Phase 1 · Mobile-first</span>
+        <button class="icon-btn" id="openSearchBtn" type="button">搜索</button>
+      </div>
+
+      <p class="hero-kicker">Yunnan Loop · 3.30 - 4.9</p>
+      <h1>一只手也能翻完的云南 11 天游攻略。</h1>
+      <p class="hero-summary">
+        先看总览，再按天进入。当前阶段先把移动端骨架、底部导航、日程摘要卡片和当天详情视图立起来，
+        图文素材的完整接入放到下一阶段。
+      </p>
+
+      <div class="hero-actions">
+        <a class="action-btn action-btn-primary" href="#overviewSection">看总览</a>
+        <a class="action-btn action-btn-secondary" href="#daysSection">按天看</a>
+        <a class="action-link" href="#packingSection">先看避坑 / 清单</a>
+      </div>
+
+      <section class="route-strip panel-soft" aria-label="路线总览">
+        <div class="section-head section-head-compact">
+          <div>
+            <p class="eyebrow">Route Spine</p>
+            <h2>路线主骨架</h2>
+          </div>
+          <p class="section-note">先暖场，再上湖，再上高原，最后用丽江和雪山收尾。</p>
+        </div>
+        <div class="route-strip__track" id="routeStrip"></div>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="section-block" id="overviewSection">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Quick Start</p>
+          <h2>先做这几件事</h2>
+        </div>
+        <p class="section-note">移动端第一屏只给决策入口，不把你困在大段说明里。</p>
+      </div>
+      <div class="overview-tools" id="overviewTools"></div>
+
+      <div class="section-head section-head-compact">
+        <div>
+          <p class="eyebrow">Phase Filter</p>
+          <h2>按阶段切换</h2>
+        </div>
+        <p class="section-note">先缩小范围，再进入当天详情。</p>
+      </div>
+      <div class="filter-row" id="phaseFilter" aria-label="阶段筛选"></div>
+
+      <div class="section-head section-head-compact">
+        <div>
+          <p class="eyebrow">Pitfalls</p>
+          <h2>先记住的坑</h2>
+        </div>
+        <p class="section-note">这一阶段先做快速提醒，下一阶段再接完整避坑引用。</p>
+      </div>
+      <div class="pitfall-rail" id="pitfallList"></div>
+    </section>
+
+    <section class="section-block" id="gallerySection">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Preview Gallery</p>
+          <h2>先刷一圈图片入口</h2>
+        </div>
+        <p class="section-note">每一天先给一张代表图，点进去再看详情页。</p>
+      </div>
+      <div class="featured-gallery" id="featuredGallery"></div>
+    </section>
+
+    <section class="section-block" id="daysSection">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Day Cards</p>
+          <h2>按天摘要卡片流</h2>
+        </div>
+        <button class="inline-search-btn" id="openSearchInlineBtn" type="button">搜索景点</button>
+      </div>
+      <p class="section-note section-note-wide">
+        列表页只保留当天判断、封面图和标签。真正的路线、吃住和图片区都放到当天详情里。
+      </p>
+      <p class="results-meta" id="resultsMeta">显示全部 11 天</p>
+      <div class="day-list" id="daysContainer"></div>
+    </section>
+
+    <section class="section-block tools-block">
+      <article class="tool-panel">
+        <div class="section-head section-head-compact">
+          <div>
+            <p class="eyebrow">Booking</p>
+            <h2>关键预订节点</h2>
+          </div>
+        </div>
+        <div class="timeline-list" id="bookingList"></div>
+      </article>
+
+      <article class="tool-panel">
+        <div class="section-head section-head-compact">
+          <div>
+            <p class="eyebrow">Notes</p>
+            <h2>统一注意事项</h2>
+          </div>
+        </div>
+        <div class="note-grid" id="globalNotes"></div>
+      </article>
+    </section>
+
+    <section class="section-block" id="packingSection">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Packing</p>
+          <h2>出发前勾一下</h2>
+        </div>
+        <p class="section-note">移动端改成单列勾选，保证顺手。</p>
+      </div>
+      <div class="packing-grid" id="packingList"></div>
+    </section>
+  </main>
+
+  <section class="search-shell" id="searchShell" hidden>
+    <div class="search-backdrop" data-close-search></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <div class="search-head">
+        <div>
+          <p class="eyebrow">Search</p>
+          <h2 id="searchTitle">搜天数、地名和景点</h2>
+        </div>
+        <button class="icon-btn" data-close-search type="button">关闭</button>
+      </div>
+      <label class="search-field">
+        <span>输入关键词</span>
+        <input id="searchInput" type="search" placeholder="例如：泸沽湖、飞来寺、蓝月谷" />
+      </label>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </section>
+
+  <section class="detail-shell" id="detailShell" hidden>
+    <div class="detail-backdrop" data-close-detail></div>
+    <div class="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="detail-head">
+        <button class="icon-btn" data-close-detail type="button">返回</button>
+        <span class="detail-phase" id="detailPhaseBadge"></span>
+      </div>
+
+      <div class="detail-hero">
+        <img class="detail-lead-image" id="detailLeadImage" alt="" loading="lazy" />
+        <div class="detail-hero-copy">
+          <p class="eyebrow" id="detailEyebrow"></p>
+          <h2 id="detailTitle"></h2>
+          <p class="detail-decision" id="detailDecision"></p>
+          <p class="detail-summary" id="detailSummary"></p>
+          <div class="detail-badges" id="detailBadges"></div>
+        </div>
+      </div>
+
+      <div class="detail-gallery-rail" id="detailGalleryRail"></div>
+      <div class="detail-tabs" id="detailTabs" role="tablist" aria-label="当天详情切换"></div>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </section>
+
+  <section class="lightbox-shell" id="lightboxShell" hidden>
+    <div class="lightbox-backdrop" data-close-lightbox></div>
+    <div class="lightbox-panel" role="dialog" aria-modal="true" aria-labelledby="lightboxCounter">
+      <div class="lightbox-head">
+        <p class="eyebrow" id="lightboxCounter">图片 1 / 1</p>
+        <button class="icon-btn" data-close-lightbox type="button">关闭</button>
+      </div>
+
+      <div class="lightbox-frame">
+        <button class="lightbox-nav lightbox-nav-prev" type="button" data-lightbox-nav="prev" aria-label="上一张">‹</button>
+        <img class="lightbox-image" id="lightboxImage" alt="" loading="lazy" />
+        <button class="lightbox-nav lightbox-nav-next" type="button" data-lightbox-nav="next" aria-label="下一张">›</button>
+      </div>
+
+      <div class="lightbox-copy">
+        <p class="lightbox-caption" id="lightboxCaption"></p>
+        <p class="lightbox-source" id="lightboxSource"></p>
+        <button class="lightbox-source-btn" id="lightboxSourceBtn" type="button">查看对应原文</button>
+      </div>
+    </div>
+  </section>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="页面导航">
+    <button class="bottom-nav__btn is-active" type="button" data-section="overviewSection">总览</button>
+    <button class="bottom-nav__btn" type="button" data-section="gallerySection">图片</button>
+    <button class="bottom-nav__btn" type="button" data-section="daysSection">行程</button>
+    <button class="bottom-nav__btn" type="button" data-section="packingSection">清单</button>
+  </nav>
+
+  <script src="/static/guide/yunnan.js" defer></script>
+</body>
+</html>

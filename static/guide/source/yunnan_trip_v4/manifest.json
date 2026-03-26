@@ -1,0 +1,874 @@
+{
+  "source_docx": "/Users/lijiabo/Desktop/云南十天（昆明大理泸沽湖丽江香格里拉）(4).docx",
+  "generated_at_utc": "2026-03-26T06:55:16.384135+00:00",
+  "paragraph_count": 376,
+  "image_count": 48,
+  "media_files": [
+    {
+      "source_media_path": "word/media/image1.png",
+      "original_name": "image1.png",
+      "extracted_name": "image-001.png",
+      "relative_path": "./images/image-001.png"
+    },
+    {
+      "source_media_path": "word/media/image10.png",
+      "original_name": "image10.png",
+      "extracted_name": "image-010.png",
+      "relative_path": "./images/image-010.png"
+    },
+    {
+      "source_media_path": "word/media/image11.jpeg",
+      "original_name": "image11.jpeg",
+      "extracted_name": "image-011.jpeg",
+      "relative_path": "./images/image-011.jpeg"
+    },
+    {
+      "source_media_path": "word/media/image12.jpeg",
+      "original_name": "image12.jpeg",
+      "extracted_name": "image-012.jpeg",
+      "relative_path": "./images/image-012.jpeg"
+    },
+    {
+      "source_media_path": "word/media/image13.png",
+      "original_name": "image13.png",
+      "extracted_name": "image-013.png",
+      "relative_path": "./images/image-013.png"
+    },
+    {
+      "source_media_path": "word/media/image14.png",
+      "original_name": "image14.png",
+      "extracted_name": "image-014.png",
+      "relative_path": "./images/image-014.png"
+    },
+    {
+      "source_media_path": "word/media/image15.png",
+      "original_name": "image15.png",
+      "extracted_name": "image-015.png",
+      "relative_path": "./images/image-015.png"
+    },
+    {
+      "source_media_path": "word/media/image16.jpeg",
+      "original_name": "image16.jpeg",
+      "extracted_name": "image-016.jpeg",
+      "relative_path": "./images/image-016.jpeg"
+    },
+    {
+      "source_media_path": "word/media/image17.png",
+      "original_name": "image17.png",
+      "extracted_name": "image-017.png",
+      "relative_path": "./images/image-017.png"
+    },
+    {
+      "source_media_path": "word/media/image18.png",
+      "original_name": "image18.png",
+      "extracted_name": "image-018.png",
+      "relative_path": "./images/image-018.png"
+    },
+    {
+      "source_media_path": "word/media/image19.png",
+      "original_name": "image19.png",
+      "extracted_name": "image-019.png",
+      "relative_path": "./images/image-019.png"
+    },
+    {
+      "source_media_path": "word/media/image2.png",
+      "original_name": "image2.png",
+      "extracted_name": "image-002.png",
+      "relative_path": "./images/image-002.png"
+    },
+    {
+      "source_media_path": "word/media/image20.png",
+      "original_name": "image20.png",
+      "extracted_name": "image-020.png",
+      "relative_path": "./images/image-020.png"
+    },
+    {
+      "source_media_path": "word/media/image21.jpeg",
+      "original_name": "image21.jpeg",
+      "extracted_name": "image-021.jpeg",
+      "relative_path": "./images/image-021.jpeg"
+    },
+    {
+      "source_media_path": "word/media/image22.png",
+      "original_name": "image22.png",
+      "extracted_name": "image-022.png",
+      "relative_path": "./images/image-022.png"
+    },
+    {
+      "source_media_path": "word/media/image23.png",
+      "original_name": "image23.png",
+      "extracted_name": "image-023.png",
+      "relative_path": "./images/image-023.png"
+    },
+    {
+      "source_media_path": "word/media/image24.png",
+      "original_name": "image24.png",
+      "extracted_name": "image-024.png",
+      "relative_path": "./images/image-024.png"
+    },
+    {
+      "source_media_path": "word/media/image25.png",
+      "original_name": "image25.png",
+      "extracted_name": "image-025.png",
+      "relative_path": "./images/image-025.png"
+    },
+    {
+      "source_media_path": "word/media/image26.png",
+      "original_name": "image26.png",
+      "extracted_name": "image-026.png",
+      "relative_path": "./images/image-026.png"
+    },
+    {
+      "source_media_path": "word/media/image27.png",
+      "original_name": "image27.png",
+      "extracted_name": "image-027.png",
+      "relative_path": "./images/image-027.png"
+    },
+    {
+      "source_media_path": "word/media/image28.png",
+      "original_name": "image28.png",
+      "extracted_name": "image-028.png",
+      "relative_path": "./images/image-028.png"
+    },
+    {
+      "source_media_path": "word/media/image29.png",
+      "original_name": "image29.png",
+      "extracted_name": "image-029.png",
+      "relative_path": "./images/image-029.png"
+    },
+    {
+      "source_media_path": "word/media/image3.jpeg",
+      "original_name": "image3.jpeg",
+      "extracted_name": "image-003.jpeg",
+      "relative_path": "./images/image-003.jpeg"
+    },
+    {
+      "source_media_path": "word/media/image30.png",
+      "original_name": "image30.png",
+      "extracted_name": "image-030.png",
+      "relative_path": "./images/image-030.png"
+    },
+    {
+      "source_media_path": "word/media/image31.png",
+      "original_name": "image31.png",
+      "extracted_name": "image-031.png",
+      "relative_path": "./images/image-031.png"
+    },
+    {
+      "source_media_path": "word/media/image32.png",
+      "original_name": "image32.png",
+      "extracted_name": "image-032.png",
+      "relative_path": "./images/image-032.png"
+    },
+    {
+      "source_media_path": "word/media/image33.png",
+      "original_name": "image33.png",
+      "extracted_name": "image-033.png",
+      "relative_path": "./images/image-033.png"
+    },
+    {
+      "source_media_path": "word/media/image34.png",
+      "original_name": "image34.png",
+      "extracted_name": "image-034.png",
+      "relative_path": "./images/image-034.png"
+    },
+    {
+      "source_media_path": "word/media/image35.png",
+      "original_name": "image35.png",
+      "extracted_name": "image-035.png",
+      "relative_path": "./images/image-035.png"
+    },
+    {
+      "source_media_path": "word/media/image36.png",
+      "original_name": "image36.png",
+      "extracted_name": "image-036.png",
+      "relative_path": "./images/image-036.png"
+    },
+    {
+      "source_media_path": "word/media/image37.png",
+      "original_name": "image37.png",
+      "extracted_name": "image-037.png",
+      "relative_path": "./images/image-037.png"
+    },
+    {
+      "source_media_path": "word/media/image38.png",
+      "original_name": "image38.png",
+      "extracted_name": "image-038.png",
+      "relative_path": "./images/image-038.png"
+    },
+    {
+      "source_media_path": "word/media/image39.png",
+      "original_name": "image39.png",
+      "extracted_name": "image-039.png",
+      "relative_path": "./images/image-039.png"
+    },
+    {
+      "source_media_path": "word/media/image4.png",
+      "original_name": "image4.png",
+      "extracted_name": "image-004.png",
+      "relative_path": "./images/image-004.png"
+    },
+    {
+      "source_media_path": "word/media/image40.png",
+      "original_name": "image40.png",
+      "extracted_name": "image-040.png",
+      "relative_path": "./images/image-040.png"
+    },
+    {
+      "source_media_path": "word/media/image41.png",
+      "original_name": "image41.png",
+      "extracted_name": "image-041.png",
+      "relative_path": "./images/image-041.png"
+    },
+    {
+      "source_media_path": "word/media/image42.png",
+      "original_name": "image42.png",
+      "extracted_name": "image-042.png",
+      "relative_path": "./images/image-042.png"
+    },
+    {
+      "source_media_path": "word/media/image43.png",
+      "original_name": "image43.png",
+      "extracted_name": "image-043.png",
+      "relative_path": "./images/image-043.png"
+    },
+    {
+      "source_media_path": "word/media/image44.png",
+      "original_name": "image44.png",
+      "extracted_name": "image-044.png",
+      "relative_path": "./images/image-044.png"
+    },
+    {
+      "source_media_path": "word/media/image45.png",
+      "original_name": "image45.png",
+      "extracted_name": "image-045.png",
+      "relative_path": "./images/image-045.png"
+    },
+    {
+      "source_media_path": "word/media/image46.png",
+      "original_name": "image46.png",
+      "extracted_name": "image-046.png",
+      "relative_path": "./images/image-046.png"
+    },
+    {
+      "source_media_path": "word/media/image47.png",
+      "original_name": "image47.png",
+      "extracted_name": "image-047.png",
+      "relative_path": "./images/image-047.png"
+    },
+    {
+      "source_media_path": "word/media/image48.png",
+      "original_name": "image48.png",
+      "extracted_name": "image-048.png",
+      "relative_path": "./images/image-048.png"
+    },
+    {
+      "source_media_path": "word/media/image5.png",
+      "original_name": "image5.png",
+      "extracted_name": "image-005.png",
+      "relative_path": "./images/image-005.png"
+    },
+    {
+      "source_media_path": "word/media/image6.png",
+      "original_name": "image6.png",
+      "extracted_name": "image-006.png",
+      "relative_path": "./images/image-006.png"
+    },
+    {
+      "source_media_path": "word/media/image7.png",
+      "original_name": "image7.png",
+      "extracted_name": "image-007.png",
+      "relative_path": "./images/image-007.png"
+    },
+    {
+      "source_media_path": "word/media/image8.png",
+      "original_name": "image8.png",
+      "extracted_name": "image-008.png",
+      "relative_path": "./images/image-008.png"
+    },
+    {
+      "source_media_path": "word/media/image9.png",
+      "original_name": "image9.png",
+      "extracted_name": "image-009.png",
+      "relative_path": "./images/image-009.png"
+    }
+  ],
+  "references": [
+    {
+      "image_sequence": 1,
+      "relationship_id": "rId7",
+      "source_media_path": "word/media/image1.png",
+      "original_name": "image1.png",
+      "extracted_name": "image-001.png",
+      "relative_path": "./images/image-001.png",
+      "paragraph_index": 7,
+      "paragraph_text": "",
+      "previous_text": "关注“平安云大”公众号，选择东陆预约，选择“翠湖云大”。",
+      "next_text": "云南大学校园内中外建筑汇集，繁花似锦诗意流淌。会泽楼是其标志性建筑，钟楼和食堂亦是不能错过的打卡点。"
+    },
+    {
+      "image_sequence": 2,
+      "relationship_id": "rId8",
+      "source_media_path": "word/media/image2.png",
+      "original_name": "image2.png",
+      "extracted_name": "image-002.png",
+      "relative_path": "./images/image-002.png",
+      "paragraph_index": 9,
+      "paragraph_text": "",
+      "previous_text": "云南大学校园内中外建筑汇集，繁花似锦诗意流淌。会泽楼是其标志性建筑，钟楼和食堂亦是不能错过的打卡点。",
+      "next_text": "龙门道\n正门进去就是龙门道，有九十五级台阶，称“九五台阶”。“九五，龙飞在天”，现今有“鱼跃龙门，金榜题名”之意。\n~\n会泽院\n会泽院是云大的核心建筑。古代来此参加科举考试的学子络绎不绝。\n~\n至公堂\n贡院的中心建筑就是至公堂和衡鉴堂，清康熙三年复，之后至公堂作为大礼堂被保存下来。闻一多先生在此发表了“最后一次讲演”，李公仆先生、吴晗先生等名士也在此作过讲演。\n~\n熊庆来、李广田故居\n云大的两位校长，故居里保存着李广田先生用过的书桌。\n除此之外，还有映秋院、钟楼、文渊楼等，校园里的绿植超级好，是个学习看书的好去处。"
+    },
+    {
+      "image_sequence": 3,
+      "relationship_id": "rId9",
+      "source_media_path": "word/media/image3.jpeg",
+      "original_name": "image3.jpeg",
+      "extracted_name": "image-003.jpeg",
+      "relative_path": "./images/image-003.jpeg",
+      "paragraph_index": 13,
+      "paragraph_text": "",
+      "previous_text": "昆明市中心的一个公园，可以来此感受下当地人民的市井气息。",
+      "next_text": "午餐：翠湖公园附近"
+    },
+    {
+      "image_sequence": 4,
+      "relationship_id": "rId10",
+      "source_media_path": "word/media/image4.png",
+      "original_name": "image4.png",
+      "extracted_name": "image-004.png",
+      "relative_path": "./images/image-004.png",
+      "paragraph_index": 20,
+      "paragraph_text": "",
+      "previous_text": "注：民族文化村建议不去，就是个人造村子门票还贵，去滇池玩玩就行了。",
+      "next_text": "17:00—20:00海埂大坝—昆明老街，附近晚餐（公交）"
+    },
+    {
+      "image_sequence": 5,
+      "relationship_id": "rId11",
+      "source_media_path": "word/media/image5.png",
+      "original_name": "image5.png",
+      "extracted_name": "image-005.png",
+      "relative_path": "./images/image-005.png",
+      "paragraph_index": 25,
+      "paragraph_text": "",
+      "previous_text": "旅游路线：正义路→五一路（找不到路就用地图app搜起点和终点）",
+      "next_text": "推荐餐馆："
+    },
+    {
+      "image_sequence": 6,
+      "relationship_id": "rId12",
+      "source_media_path": "word/media/image6.png",
+      "original_name": "image6.png",
+      "extracted_name": "image-006.png",
+      "relative_path": "./images/image-006.png",
+      "paragraph_index": 37,
+      "paragraph_text": "",
+      "previous_text": "10:00—12:30昆明站—大理站，附近午餐（火车）",
+      "next_text": "如果想要省钱，其实更加推荐这班火车，比其他班次便宜接近40元！"
+    },
+    {
+      "image_sequence": 7,
+      "relationship_id": "rId13",
+      "source_media_path": "word/media/image7.png",
+      "original_name": "image7.png",
+      "extracted_name": "image-007.png",
+      "relative_path": "./images/image-007.png",
+      "paragraph_index": 39,
+      "paragraph_text": "",
+      "previous_text": "如果想要省钱，其实更加推荐这班火车，比其他班次便宜接近40元！",
+      "next_text": "12:30—13:30云想山—大理港码头（自驾约20分钟）"
+    },
+    {
+      "image_sequence": 8,
+      "relationship_id": "rId14",
+      "source_media_path": "word/media/image8.png",
+      "original_name": "image8.png",
+      "extracted_name": "image-008.png",
+      "relative_path": "./images/image-008.png",
+      "paragraph_index": 43,
+      "paragraph_text": "",
+      "previous_text": "大理港码头，沿着湖边走一走，对岸就是苍山洱海。这里可以看日落，拍到全景很壮阔。",
+      "next_text": "13:30—15:00大理港码头—大理下关街道，附近午餐（自驾约30分钟）"
+    },
+    {
+      "image_sequence": 9,
+      "relationship_id": "rId15",
+      "source_media_path": "word/media/image9.png",
+      "original_name": "image9.png",
+      "extracted_name": "image-009.png",
+      "relative_path": "./images/image-009.png",
+      "paragraph_index": 57,
+      "paragraph_text": "",
+      "previous_text": "但上到楼顶要喝茶消费，这个就看自己了，个人觉得走走免费的长廊即可。",
+      "next_text": "17:00—19:00大理海东镇—金梭岛码头（自驾约20分钟）"
+    },
+    {
+      "image_sequence": 10,
+      "relationship_id": "rId16",
+      "source_media_path": "word/media/image10.png",
+      "original_name": "image10.png",
+      "extracted_name": "image-010.png",
+      "relative_path": "./images/image-010.png",
+      "paragraph_index": 60,
+      "paragraph_text": "",
+      "previous_text": "导航搜索“金梭岛码头”，旁边有个湿地公园，走到水边可以拍到枯树倒影。",
+      "next_text": "游玩后返回酒店休息，天气好可以附近看个日落。"
+    },
+    {
+      "image_sequence": 11,
+      "relationship_id": "rId17",
+      "source_media_path": "word/media/image11.jpeg",
+      "original_name": "image11.jpeg",
+      "extracted_name": "image-011.jpeg",
+      "relative_path": "./images/image-011.jpeg",
+      "paragraph_index": 74,
+      "paragraph_text": "",
+      "previous_text": "洱海边上的绝美小村庄，整个村子建在半山悬崖上，随手一拍都是大片。",
+      "next_text": "11:00—12:00文笔村—小普陀（自驾约10分钟）"
+    },
+    {
+      "image_sequence": 12,
+      "relationship_id": "rId18",
+      "source_media_path": "word/media/image12.jpeg",
+      "original_name": "image12.jpeg",
+      "extracted_name": "image-012.jpeg",
+      "relative_path": "./images/image-012.jpeg",
+      "paragraph_index": 79,
+      "paragraph_text": "",
+      "previous_text": "上岛大可不必，除非有烧香拜佛的心愿，远观一样很美。",
+      "next_text": "午餐：挖色镇附近"
+    },
+    {
+      "image_sequence": 13,
+      "relationship_id": "rId19",
+      "source_media_path": "word/media/image13.png",
+      "original_name": "image13.png",
+      "extracted_name": "image-013.png",
+      "relative_path": "./images/image-013.png",
+      "paragraph_index": 86,
+      "paragraph_text": "",
+      "previous_text": "这里是仙剑一的拍摄地，如果没有兴趣上岛，就在岸边看看也可以了。",
+      "next_text": "网红拍照地："
+    },
+    {
+      "image_sequence": 14,
+      "relationship_id": "rId20",
+      "source_media_path": "word/media/image14.png",
+      "original_name": "image14.png",
+      "extracted_name": "image-014.png",
+      "relative_path": "./images/image-014.png",
+      "paragraph_index": 96,
+      "paragraph_text": "",
+      "previous_text": "这里主要看的是田园风光，刘亦菲主演的电视剧就在此取景，没必要进入收费景区。",
+      "next_text": "附近美食："
+    },
+    {
+      "image_sequence": 15,
+      "relationship_id": "rId21",
+      "source_media_path": "word/media/image15.png",
+      "original_name": "image15.png",
+      "extracted_name": "image-015.png",
+      "relative_path": "./images/image-015.png",
+      "paragraph_index": 105,
+      "paragraph_text": "",
+      "previous_text": "自驾前往酒店，把车子停在停车场里，然后再出来逛。",
+      "next_text": "游玩路线：古城南门→复兴路→红龙井→博爱路→人民路→广武路→玉洱路→叶榆路→人民路→洱海门，共计约3.2公里。\n建议停留游玩点："
+    },
+    {
+      "image_sequence": 16,
+      "relationship_id": "rId22",
+      "source_media_path": "word/media/image16.jpeg",
+      "original_name": "image16.jpeg",
+      "extracted_name": "image-016.jpeg",
+      "relative_path": "./images/image-016.jpeg",
+      "paragraph_index": 124,
+      "paragraph_text": "",
+      "previous_text": "才村是洱海西岸最著名的村落，如今已经建成生态长廊，可以一路边走边拍。",
+      "next_text": "拍照点：造型独特的枯树、枯萎的芦苇荡"
+    },
+    {
+      "image_sequence": 17,
+      "relationship_id": "rId23",
+      "source_media_path": "word/media/image17.png",
+      "original_name": "image17.png",
+      "extracted_name": "image-017.png",
+      "relative_path": "./images/image-017.png",
+      "paragraph_index": 132,
+      "paragraph_text": "",
+      "previous_text": "下波棚是海西一个非常有名的村落，处于S弯上，但不一定能拍到。",
+      "next_text": "拍照点：网红S弯"
+    },
+    {
+      "image_sequence": 18,
+      "relationship_id": "rId24",
+      "source_media_path": "word/media/image18.png",
+      "original_name": "image18.png",
+      "extracted_name": "image-018.png",
+      "relative_path": "./images/image-018.png",
+      "paragraph_index": 137,
+      "paragraph_text": "",
+      "previous_text": "廊桥最著名的就是歪鼻子树，已经成为美女们人手一张照片的拍摄地。",
+      "next_text": "拍照点：古风廊桥、枯树摆拍"
+    },
+    {
+      "image_sequence": 19,
+      "relationship_id": "rId25",
+      "source_media_path": "word/media/image19.png",
+      "original_name": "image19.png",
+      "extracted_name": "image-019.png",
+      "relative_path": "./images/image-019.png",
+      "paragraph_index": 143,
+      "paragraph_text": "",
+      "previous_text": "百味轩私房菜（人均70元）、带皮毛驴肉牛肉火锅店(原天运饭店)（人均80元）、丽花清真牛肉馆（人均30元）、龙凤瑞英清真饭馆（人均60元）",
+      "next_text": "游玩路线：古镇不大，走路很轻松。"
+    },
+    {
+      "image_sequence": 20,
+      "relationship_id": "rId26",
+      "source_media_path": "word/media/image20.png",
+      "original_name": "image20.png",
+      "extracted_name": "image-020.png",
+      "relative_path": "./images/image-020.png",
+      "paragraph_index": 160,
+      "paragraph_text": "",
+      "previous_text": "推荐餐馆：阿妈野生菌土鸡腊排骨·蒸汽石锅鱼、摩挲菌香腊排骨石锅鱼、菌香小院蒸汽石锅鱼。",
+      "next_text": "15:00—20:00泸沽湖环湖游（云海情人滩→里格半岛→鸟岛）\n自驾，挨个导航名字即可"
+    },
+    {
+      "image_sequence": 21,
+      "relationship_id": "rId27",
+      "source_media_path": "word/media/image21.jpeg",
+      "original_name": "image21.jpeg",
+      "extracted_name": "image-021.jpeg",
+      "relative_path": "./images/image-021.jpeg",
+      "paragraph_index": 162,
+      "paragraph_text": "",
+      "previous_text": "15:00—20:00泸沽湖环湖游（云海情人滩→里格半岛→鸟岛）\n自驾，挨个导航名字即可",
+      "next_text": "a云南情人滩"
+    },
+    {
+      "image_sequence": 22,
+      "relationship_id": "rId28",
+      "source_media_path": "word/media/image22.png",
+      "original_name": "image22.png",
+      "extracted_name": "image-022.png",
+      "relative_path": "./images/image-022.png",
+      "paragraph_index": 165,
+      "paragraph_text": "",
+      "previous_text": "这里是云南的情人滩，与四川的情人滩隔湖相望。景点有点单调，简单看下就行。",
+      "next_text": "b里格半岛（重要景区）"
+    },
+    {
+      "image_sequence": 23,
+      "relationship_id": "rId29",
+      "source_media_path": "word/media/image23.png",
+      "original_name": "image23.png",
+      "extracted_name": "image-023.png",
+      "relative_path": "./images/image-023.png",
+      "paragraph_index": 170,
+      "paragraph_text": "",
+      "previous_text": "自驾可以直接登上观景台，只是山上风有点大。",
+      "next_text": "C 鸟岛"
+    },
+    {
+      "image_sequence": 24,
+      "relationship_id": "rId30",
+      "source_media_path": "word/media/image24.png",
+      "original_name": "image24.png",
+      "extracted_name": "image-024.png",
+      "relative_path": "./images/image-024.png",
+      "paragraph_index": 175,
+      "paragraph_text": "",
+      "previous_text": "冬天就是看动物的时候，反正要路过又近，看自己去不去。",
+      "next_text": "20:00—21:00鸟岛附近晚餐"
+    },
+    {
+      "image_sequence": 25,
+      "relationship_id": "rId31",
+      "source_media_path": "word/media/image25.png",
+      "original_name": "image25.png",
+      "extracted_name": "image-025.png",
+      "relative_path": "./images/image-025.png",
+      "paragraph_index": 192,
+      "paragraph_text": "",
+      "previous_text": "泸源崖是泸沽湖的源头，也是泸沽湖湖水较深的地方，较深处可达90余米。此处石崖如削,景观独特。",
+      "next_text": "b女神湾（重要景区）"
+    },
+    {
+      "image_sequence": 26,
+      "relationship_id": "rId32",
+      "source_media_path": "word/media/image26.png",
+      "original_name": "image26.png",
+      "extracted_name": "image-026.png",
+      "relative_path": "./images/image-026.png",
+      "paragraph_index": 195,
+      "paragraph_text": "",
+      "previous_text": "女神湾是泸沽湖中一个安静的港湾，也是泸沽湖最美的湖湾之一，被游人称为东方夏威夷。",
+      "next_text": "c五支洛码头（猪槽船）"
+    },
+    {
+      "image_sequence": 27,
+      "relationship_id": "rId33",
+      "source_media_path": "word/media/image27.png",
+      "original_name": "image27.png",
+      "extracted_name": "image-027.png",
+      "relative_path": "./images/image-027.png",
+      "paragraph_index": 199,
+      "paragraph_text": "",
+      "previous_text": "猪槽船可以单买票也可以包船，记得讲价（对半砍）。",
+      "next_text": "这个季节草是黄的、花没有开，所以选择选路1或4较为合适，只能看海鸥。"
+    },
+    {
+      "image_sequence": 28,
+      "relationship_id": "rId34",
+      "source_media_path": "word/media/image28.png",
+      "original_name": "image28.png",
+      "extracted_name": "image-028.png",
+      "relative_path": "./images/image-028.png",
+      "paragraph_index": 201,
+      "paragraph_text": "",
+      "previous_text": "这个季节草是黄的、花没有开，所以选择选路1或4较为合适，只能看海鸥。",
+      "next_text": "d草海（重要景区）"
+    },
+    {
+      "image_sequence": 29,
+      "relationship_id": "rId35",
+      "source_media_path": "word/media/image29.png",
+      "original_name": "image29.png",
+      "extracted_name": "image-029.png",
+      "relative_path": "./images/image-029.png",
+      "paragraph_index": 205,
+      "paragraph_text": "",
+      "previous_text": "草海附近还有个摩挲博物馆，如果有兴趣可以去看看，增长下见识。",
+      "next_text": "午餐推荐：香村土菜馆（人均40元），就在草海附近。"
+    },
+    {
+      "image_sequence": 30,
+      "relationship_id": "rId36",
+      "source_media_path": "word/media/image30.png",
+      "original_name": "image30.png",
+      "extracted_name": "image-030.png",
+      "relative_path": "./images/image-030.png",
+      "paragraph_index": 210,
+      "paragraph_text": "",
+      "previous_text": "传说，在这里和心爱的人手牵手走过，就可以拥有长久的爱情。",
+      "next_text": "f蒗放"
+    },
+    {
+      "image_sequence": 31,
+      "relationship_id": "rId37",
+      "source_media_path": "word/media/image31.png",
+      "original_name": "image31.png",
+      "extracted_name": "image-031.png",
+      "relative_path": "./images/image-031.png",
+      "paragraph_index": 213,
+      "paragraph_text": "",
+      "previous_text": "蒗放是泸沽湖最后开发的村子, 最大程度的保留了泸沽湖原有的风景和原生态。",
+      "next_text": "当天住宿：泸沽湖风景区（宿前一晚酒店）"
+    },
+    {
+      "image_sequence": 32,
+      "relationship_id": "rId38",
+      "source_media_path": "word/media/image32.png",
+      "original_name": "image32.png",
+      "extracted_name": "image-032.png",
+      "relative_path": "./images/image-032.png",
+      "paragraph_index": 217,
+      "paragraph_text": "",
+      "previous_text": "注：当天从泸沽湖归来，另一波人直接自驾去丽江即可。",
+      "next_text": "9:00—16:00沽湖风景区—香格里拉，附近午餐（自驾约5小时）"
+    },
+    {
+      "image_sequence": 33,
+      "relationship_id": "rId39",
+      "source_media_path": "word/media/image33.png",
+      "original_name": "image33.png",
+      "extracted_name": "image-033.png",
+      "relative_path": "./images/image-033.png",
+      "paragraph_index": 228,
+      "paragraph_text": "",
+      "previous_text": "走环湖路不仅可以深入其中，更重要的是可以免门票，完全不用进收费景区！",
+      "next_text": "19:00—21:00纳帕海草原—独克宗古城，附近晚餐（自驾约20分钟）"
+    },
+    {
+      "image_sequence": 34,
+      "relationship_id": "rId40",
+      "source_media_path": "word/media/image34.png",
+      "original_name": "image34.png",
+      "extracted_name": "image-034.png",
+      "relative_path": "./images/image-034.png",
+      "paragraph_index": 239,
+      "paragraph_text": "",
+      "previous_text": "Ps：普达措，香格里拉唯一的5A景区。这个景点以轻徒步为主，全程5—6小时。",
+      "next_text": "游览路线："
+    },
+    {
+      "image_sequence": 35,
+      "relationship_id": "rId41",
+      "source_media_path": "word/media/image35.png",
+      "original_name": "image35.png",
+      "extracted_name": "image-035.png",
+      "relative_path": "./images/image-035.png",
+      "paragraph_index": 245,
+      "paragraph_text": "",
+      "previous_text": "③碧塔湖栈道（1km）\n要坐观光车回到大门换车到达。碧塔湖视野不如属都湖开阔，但有种秘境之感，且可以看到满是野花的草原和马儿。五六月份有“杜鹃醉鱼”和“老熊捞鱼”两大奇景，现在能否得见要看运气了。",
+      "next_text": "15:00—16:30普达措森林公园—香格里拉市区午餐（自驾约30分钟）"
+    },
+    {
+      "image_sequence": 36,
+      "relationship_id": "rId42",
+      "source_media_path": "word/media/image36.png",
+      "original_name": "image36.png",
+      "extracted_name": "image-036.png",
+      "relative_path": "./images/image-036.png",
+      "paragraph_index": 252,
+      "paragraph_text": "",
+      "previous_text": "松赞林寺是云南省规模最大的藏传佛教寺院，也是康区有名的大寺院之一，被誉为“小布达拉宫”。",
+      "next_text": "Tips：这个景点门票+观光车=65元（必须携带身份证）。"
+    },
+    {
+      "image_sequence": 37,
+      "relationship_id": "rId43",
+      "source_media_path": "word/media/image37.png",
+      "original_name": "image37.png",
+      "extracted_name": "image-037.png",
+      "relative_path": "./images/image-037.png",
+      "paragraph_index": 258,
+      "paragraph_text": "",
+      "previous_text": "当天就在独克宗古城游玩，后面就是龟山公园，拥有实际上最大的传经筒。",
+      "next_text": "附近美食：舌尖上的小厨师总店（有团购，人均70元，火锅），青木厨坊（有团购，人均50元，炒菜烤肉），塔洛藏餐吧（有团购，人均70元）、顺顺小吃（有团购，人均80元）"
+    },
+    {
+      "image_sequence": 38,
+      "relationship_id": "rId44",
+      "source_media_path": "word/media/image38.png",
+      "original_name": "image38.png",
+      "extracted_name": "image-038.png",
+      "relative_path": "./images/image-038.png",
+      "paragraph_index": 260,
+      "paragraph_text": "",
+      "previous_text": "附近美食：舌尖上的小厨师总店（有团购，人均70元，火锅），青木厨坊（有团购，人均50元，炒菜烤肉），塔洛藏餐吧（有团购，人均70元）、顺顺小吃（有团购，人均80元）",
+      "next_text": "游玩地图："
+    },
+    {
+      "image_sequence": 39,
+      "relationship_id": "rId45",
+      "source_media_path": "word/media/image39.png",
+      "original_name": "image39.png",
+      "extracted_name": "image-039.png",
+      "relative_path": "./images/image-039.png",
+      "paragraph_index": 262,
+      "paragraph_text": "",
+      "previous_text": "游玩地图：",
+      "next_text": "注：如果想凹造型出片，可以导航“大金幡”，就在独克宗边缘。但也要收门票，非常不值。"
+    },
+    {
+      "image_sequence": 40,
+      "relationship_id": "rId46",
+      "source_media_path": "word/media/image40.png",
+      "original_name": "image40.png",
+      "extracted_name": "image-040.png",
+      "relative_path": "./images/image-040.png",
+      "paragraph_index": 272,
+      "paragraph_text": "",
+      "previous_text": "别称月亮湾，也称金沙江大湾、金沙江大拐弯 。",
+      "next_text": "13:30—15:00金沙江大拐弯—白马雪山观景台（自驾约1小时）"
+    },
+    {
+      "image_sequence": 41,
+      "relationship_id": "rId47",
+      "source_media_path": "word/media/image41.png",
+      "original_name": "image41.png",
+      "extracted_name": "image-041.png",
+      "relative_path": "./images/image-041.png",
+      "paragraph_index": 280,
+      "paragraph_text": "",
+      "previous_text": "小众人少，视野开阔，拍照不用抢机位。",
+      "next_text": "18:00—20:00梅里雪山雾浓顶—梅里雪山飞来寺，附近晚餐（自驾约30分钟）"
+    },
+    {
+      "image_sequence": 42,
+      "relationship_id": "rId48",
+      "source_media_path": "word/media/image42.png",
+      "original_name": "image42.png",
+      "extracted_name": "image-042.png",
+      "relative_path": "./images/image-042.png",
+      "paragraph_index": 281,
+      "paragraph_text": "",
+      "previous_text": "小众人少，视野开阔，拍照不用抢机位。",
+      "next_text": "18:00—20:00梅里雪山雾浓顶—梅里雪山飞来寺，附近晚餐（自驾约30分钟）"
+    },
+    {
+      "image_sequence": 43,
+      "relationship_id": "rId49",
+      "source_media_path": "word/media/image43.png",
+      "original_name": "image43.png",
+      "extracted_name": "image-043.png",
+      "relative_path": "./images/image-043.png",
+      "paragraph_index": 286,
+      "paragraph_text": "",
+      "previous_text": "可以关注下当地日落时间（约19:00），运气好能看到日落金山。",
+      "next_text": "关于晚餐；飞来寺附近吃饭巨坑，建议简餐不要迷信网红店，如果一定要吃大餐最好用团购。"
+    },
+    {
+      "image_sequence": 44,
+      "relationship_id": "rId50",
+      "source_media_path": "word/media/image44.png",
+      "original_name": "image44.png",
+      "extracted_name": "image-044.png",
+      "relative_path": "./images/image-044.png",
+      "paragraph_index": 298,
+      "paragraph_text": "",
+      "previous_text": "至于去不去虎跳峡收费景区就看自己了，可以下去看到那个大拐弯。门票45元，18:00停止入场。",
+      "next_text": "虎跳峡景区避坑攻略："
+    },
+    {
+      "image_sequence": 45,
+      "relationship_id": "rId51",
+      "source_media_path": "word/media/image45.png",
+      "original_name": "image45.png",
+      "extracted_name": "image-045.png",
+      "relative_path": "./images/image-045.png",
+      "paragraph_index": 313,
+      "paragraph_text": "",
+      "previous_text": "19:55进入购票页面按步骤操作，等到19:58把手指按到拼图上验证好，切记不要松开手指，看时间变成20:00松开手指。（冰川公园必须准点抢票）",
+      "next_text": "8:00—14:00丽江古城—玉龙雪山风景区（冰川公园+蓝月谷或云杉坪+蓝月谷）（自驾约40分钟）"
+    },
+    {
+      "image_sequence": 46,
+      "relationship_id": "rId52",
+      "source_media_path": "word/media/image46.png",
+      "original_name": "image46.png",
+      "extracted_name": "image-046.png",
+      "relative_path": "./images/image-046.png",
+      "paragraph_index": 322,
+      "paragraph_text": "",
+      "previous_text": "蓝月谷反正不要钱，不去不去白不去。",
+      "next_text": "如何买票？"
+    },
+    {
+      "image_sequence": 47,
+      "relationship_id": "rId53",
+      "source_media_path": "word/media/image47.png",
+      "original_name": "image47.png",
+      "extracted_name": "image-047.png",
+      "relative_path": "./images/image-047.png",
+      "paragraph_index": 336,
+      "paragraph_text": "",
+      "previous_text": "白沙镇，远观玉龙雪山的最佳地点，也是丽江唯一没有商业化的古镇。",
+      "next_text": "附近美食：云雪丽白沙火塘（网红店，观景餐厅，有团购）、白沙人家餐厅（人均70元，纳西菜）、陈大厨白沙风味馆（人均70元，特色炒菜）"
+    },
+    {
+      "image_sequence": 48,
+      "relationship_id": "rId54",
+      "source_media_path": "word/media/image48.png",
+      "original_name": "image48.png",
+      "extracted_name": "image-048.png",
+      "relative_path": "./images/image-048.png",
+      "paragraph_index": 341,
+      "paragraph_text": "",
+      "previous_text": "丽江大研古城是世界文化遗产。不过现在商业化严重，从街头到巷尾都销售着义乌小商品，里面东西偏贵。",
+      "next_text": "游玩路线："
+    }
+  ]
+}
