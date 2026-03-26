@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>云南路线长卷 | Mobile-First Phase 1</title>
+  <title>云南路线长卷 | Mobile-First Phase 3</title>
   <meta
     name="description"
-    content="移动端优先的云南 11 天游攻略第一阶段：摘要卡片流、底部导航、当天详情视图。"
+    content="移动端优先的云南 11 天游攻略第三阶段：图文引用、搜索分组、避坑筛选、工具卡和深链。"
   />
   <link rel="stylesheet" href="/static/guide/yunnan.css" />
 </head>
@@ -21,15 +21,15 @@
     <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
     <div class="shell hero-shell">
       <div class="hero-bar">
-        <span class="status-chip">Phase 1 · Mobile-first</span>
+        <span class="status-chip">Phase 3 · Search + Tools</span>
         <button class="icon-btn" id="openSearchBtn" type="button">搜索</button>
       </div>
 
       <p class="hero-kicker">Yunnan Loop · 3.30 - 4.9</p>
       <h1>一只手也能翻完的云南 11 天游攻略。</h1>
       <p class="hero-summary">
-        先看总览，再按天进入。当前阶段先把移动端骨架、底部导航、日程摘要卡片和当天详情视图立起来，
-        图文素材的完整接入放到下一阶段。
+        先看总览，再按天进入。现在这版已经把原文和图片接进来了，第三阶段继续补搜索分组、
+        避坑筛选、预订工具卡、清单折叠和可分享的深链。
       </p>
 
       <div class="hero-actions">
@@ -76,8 +76,9 @@
           <p class="eyebrow">Pitfalls</p>
           <h2>先记住的坑</h2>
         </div>
-        <p class="section-note">这一阶段先做快速提醒，下一阶段再接完整避坑引用。</p>
+        <p class="section-note">现在可以按坑的类型筛，再点进具体哪一天。</p>
       </div>
+      <div class="pitfall-filters" id="pitfallFilters"></div>
       <div class="pitfall-rail" id="pitfallList"></div>
     </section>
 
@@ -107,7 +108,7 @@
       <div class="day-list" id="daysContainer"></div>
     </section>
 
-    <section class="section-block tools-block">
+    <section class="section-block tools-block" id="toolsSection">
       <article class="tool-panel">
         <div class="section-head section-head-compact">
           <div>
@@ -115,6 +116,8 @@
             <h2>关键预订节点</h2>
           </div>
         </div>
+        <p class="section-note section-note-wide">把最容易忘、最值得提前处理的事项压成可点的工具卡。</p>
+        <div class="tool-card-grid" id="bookingTools"></div>
         <div class="timeline-list" id="bookingList"></div>
       </article>
 
@@ -135,8 +138,9 @@
           <p class="eyebrow">Packing</p>
           <h2>出发前勾一下</h2>
         </div>
-        <p class="section-note">移动端改成单列勾选，保证顺手。</p>
+        <p class="section-note">现在支持分组折叠，适合手机单手快速清点。</p>
       </div>
+      <div class="packing-toolbar" id="packingActions"></div>
       <div class="packing-grid" id="packingList"></div>
     </section>
   </main>
@@ -155,6 +159,8 @@
         <span>输入关键词</span>
         <input id="searchInput" type="search" placeholder="例如：泸沽湖、飞来寺、蓝月谷" />
       </label>
+      <div class="search-filter-row" id="searchFilters"></div>
+      <p class="search-summary" id="searchSummary">支持搜索天数、景点、餐馆、原文和图片引用。</p>
       <div class="search-results" id="searchResults"></div>
     </div>
   </section>

@@ -468,6 +468,7 @@ const dayData = [
 ];
 
 const PACKING_STORAGE_KEY = "yunnan_guide_packing_v1";
+const PACKING_GROUP_STORAGE_KEY = "yunnan_guide_packing_groups_v1";
 const DAY_MAP_PATH = "/static/guide/source/yunnan_trip_v4/day-map.json";
 const imageExtOverrides = new Set([3, 11, 12, 16, 21]);
 const DETAIL_TABS = [
@@ -476,6 +477,22 @@ const DETAIL_TABS = [
   { id: "stay", label: "吃住" },
   { id: "source", label: "原文" },
 ];
+const SEARCH_FILTERS = [
+  { id: "all", label: "全部" },
+  { id: "days", label: "天数" },
+  { id: "places", label: "景点" },
+  { id: "food", label: "吃住" },
+  { id: "source", label: "原文" },
+  { id: "images", label: "图片" },
+];
+const SEARCH_GROUP_LABELS = {
+  days: "天数与路线",
+  places: "景点与地名",
+  food: "餐馆与住宿",
+  source: "原文段落",
+  images: "图片引用",
+};
+const PITFALL_CATEGORIES = ["all", "收费不值", "建议绕开", "必须提前订", "高原提醒"];
 
 const routeSpine = [
   { name: "昆明", note: "缓冲身体和作息，把第一天放松下来。" },
@@ -492,7 +509,7 @@ const overviewCards = [
     title: "先锁交通和雪山票",
     body: "昆明到大理的高铁和玉龙雪山冰川公园门票，是整条线最该提前处理的两个点。",
     action: "看预订",
-    target: "bookingList",
+    target: "toolsSection",
   },
   {
     eyebrow: "Pace",
@@ -517,8 +534,52 @@ const overviewCards = [
   },
 ];
 
+const bookingToolCards = [
+  {
+    id: "train",
+    title: "先锁昆明 → 大理高铁",
+    body: "这张票决定前半程节奏能不能顺下来，越临近越容易被迫改计划。",
+    meta: ["高铁", "Day 2"],
+    actions: [
+      { label: "看时间线", kind: "scroll", target: "toolsSection" },
+      { label: "打开 Day 2", kind: "day", dayId: "day2", tab: "route" },
+    ],
+  },
+  {
+    id: "hotel",
+    title: "海东 / 沙溪 / 泸沽湖 / 梅里提前订",
+    body: "这几段住宿波动最大，文档建议先用平台找电话，再直接沟通议价。",
+    meta: ["住宿", "电话议价"],
+    actions: [
+      { label: "筛到大理段", kind: "phase", phase: "warmup" },
+      { label: "看 Day 9", kind: "day", dayId: "day9", tab: "stay" },
+    ],
+  },
+  {
+    id: "snow",
+    title: "冰川公园提前 7 天 20:00 抢",
+    body: "玉龙雪山最重要的不是临场冲，而是提前把所有出行人信息录完，守准 20:00。",
+    meta: ["必须提前订", "Day 11"],
+    actions: [
+      { label: "打开抢票原文", kind: "day", dayId: "day11", tab: "source" },
+      { label: "只看必须提前订", kind: "pitfall", category: "必须提前订" },
+    ],
+  },
+  {
+    id: "oxygen",
+    title: "高原段前先补氧气和药",
+    body: "真正连续高海拔的是香格里拉、梅里和玉龙雪山，别等上去之后再找氧气瓶。",
+    meta: ["高原提醒", "Day 7+"],
+    actions: [
+      { label: "看高原提醒", kind: "pitfall", category: "高原提醒" },
+      { label: "打开 Day 7", kind: "day", dayId: "day7", tab: "route" },
+    ],
+  },
+];
+
 const pitfallTemplates = [
   {
+    id: "day1_skip_village",
     dayId: "day1",
     title: "民族村直接绕开",
     category: "建议绕开",
@@ -526,6 +587,7 @@ const pitfallTemplates = [
     fallback: "民族文化村建议不去，就是个人造村子门票还贵，去滇池玩玩就行了。",
   },
   {
+    id: "day2_skip_rooftop",
     dayId: "day2",
     title: "理想邦别上楼顶",
     category: "收费不值",
@@ -533,6 +595,15 @@ const pitfallTemplates = [
     fallback: "但上到楼顶要喝茶消费，这个就看自己了，个人觉得走走免费的长廊即可。",
   },
   {
+    id: "day3_skip_island",
+    dayId: "day3",
+    title: "南诏风情岛不是必须",
+    category: "建议绕开",
+    terms: ["没有兴趣上岛", "就在岸边看看也可以"],
+    fallback: "这里是仙剑一的拍摄地，如果没有兴趣上岛，就在岸边看看也可以了。",
+  },
+  {
+    id: "day7_napa_free",
     dayId: "day7",
     title: "纳帕海走环湖路",
     category: "收费不值",
@@ -540,6 +611,23 @@ const pitfallTemplates = [
     fallback: "走环湖路不仅可以深入其中，更重要的是可以免门票，完全不用进收费景区！",
   },
   {
+    id: "day7_plateau",
+    dayId: "day7",
+    title: "高原第一天别排满",
+    category: "高原提醒",
+    terms: ["泸沽湖到香格里拉", "附近午餐（自驾约5小时）"],
+    fallback: "9:00—16:00沽湖风景区—香格里拉，附近午餐（自驾约5小时）。这天更适合把状态稳住，而不是继续加码。",
+  },
+  {
+    id: "day8_dajinfan",
+    dayId: "day8",
+    title: "大金幡不值得进",
+    category: "收费不值",
+    terms: ["大金幡", "非常不值"],
+    fallback: "注：如果想凹造型出片，可以导航“大金幡”，就在独克宗边缘。但也要收门票，非常不值。",
+  },
+  {
+    id: "day9_feilai",
     dayId: "day9",
     title: "飞来寺机位别硬买",
     category: "收费不值",
@@ -547,6 +635,7 @@ const pitfallTemplates = [
     fallback: "如果还是要收费往下走200米，看到的景色一模一样，总之完全没必要花钱。",
   },
   {
+    id: "day10_tiger",
     dayId: "day10",
     title: "虎跳峡扶梯别买",
     category: "收费不值",
@@ -554,6 +643,23 @@ const pitfallTemplates = [
     fallback: "下去单程10分钟就到了，如果想省钱，完全没必要补80元/人的扶梯票。",
   },
   {
+    id: "day11_ticket",
+    dayId: "day11",
+    title: "冰川公园要提前 7 天守点",
+    category: "必须提前订",
+    terms: ["提前7天20:00放票", "冰川公园必须准点抢票"],
+    fallback: "关注“丽江旅游集团”，提前7天20:00放票，旺季必须提前预订。",
+  },
+  {
+    id: "day11_oxygen",
+    dayId: "day11",
+    title: "上雪山前先买氧气瓶",
+    category: "高原提醒",
+    terms: ["最好在古城买个氧气瓶", "高海拔地区"],
+    fallback: "如果之前没去过高海拔地区，最好在古城买个氧气瓶。",
+  },
+  {
+    id: "day11_bluemoon",
     dayId: "day11",
     title: "蓝月谷观光车别坐",
     category: "收费不值",
@@ -617,15 +723,20 @@ const els = {
   routeStrip: document.getElementById("routeStrip"),
   overviewTools: document.getElementById("overviewTools"),
   phaseFilter: document.getElementById("phaseFilter"),
+  pitfallFilters: document.getElementById("pitfallFilters"),
   pitfallList: document.getElementById("pitfallList"),
   featuredGallery: document.getElementById("featuredGallery"),
   daysContainer: document.getElementById("daysContainer"),
   resultsMeta: document.getElementById("resultsMeta"),
+  bookingTools: document.getElementById("bookingTools"),
   bookingList: document.getElementById("bookingList"),
   globalNotes: document.getElementById("globalNotes"),
+  packingActions: document.getElementById("packingActions"),
   packingList: document.getElementById("packingList"),
   searchShell: document.getElementById("searchShell"),
   searchInput: document.getElementById("searchInput"),
+  searchFilters: document.getElementById("searchFilters"),
+  searchSummary: document.getElementById("searchSummary"),
   searchResults: document.getElementById("searchResults"),
   openSearchBtn: document.getElementById("openSearchBtn"),
   openSearchInlineBtn: document.getElementById("openSearchInlineBtn"),
@@ -659,6 +770,7 @@ const sourceStore = {
 const state = {
   phase: "all",
   searchQuery: "",
+  searchMode: "all",
   searchOpen: false,
   detailOpen: false,
   detailDayId: "",
@@ -668,11 +780,14 @@ const state = {
   lightboxOpen: false,
   lightboxDayId: "",
   lightboxIndex: 0,
+  pitfallCategory: "all",
   activeSection: "overviewSection",
-  packing: loadPackingState(),
+  packing: loadJsonStorage(PACKING_STORAGE_KEY, {}),
+  packingOpenGroups: loadPackingGroupState(),
 };
 
 let sectionObserver = null;
+let hashSyncSuspended = false;
 
 function escapeHtml(value) {
   return String(value)
@@ -698,21 +813,34 @@ function normalizeSourcePath(relativePath) {
   return `/static/guide/source/yunnan_trip_v4/${String(relativePath).replace(/^\.\//, "")}`;
 }
 
-function loadPackingState() {
+function loadJsonStorage(key, fallback) {
   try {
-    const raw = window.localStorage.getItem(PACKING_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch {
-    return {};
+    return fallback;
   }
 }
 
-function savePackingState() {
+function saveJsonStorage(key, value) {
   try {
-    window.localStorage.setItem(PACKING_STORAGE_KEY, JSON.stringify(state.packing));
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Ignore storage failures.
   }
+}
+
+function loadPackingGroupState() {
+  const stored = loadJsonStorage(PACKING_GROUP_STORAGE_KEY, null);
+  if (stored) {
+    return stored;
+  }
+
+  return Object.fromEntries(packingGroups.map((group) => [group.id, true]));
+}
+
+function savePackingGroupState() {
+  saveJsonStorage(PACKING_GROUP_STORAGE_KEY, state.packingOpenGroups);
 }
 
 function buildList(items) {
@@ -751,6 +879,15 @@ function getDayImageItems(dayId) {
     reference_before: "",
     reference_after: "",
   }));
+}
+
+function findImageIndexBySequence(dayId, sequence) {
+  const images = getDayImageItems(dayId);
+  return images.findIndex((image) => Number(image.sequence) === Number(sequence));
+}
+
+function includesQuery(value, query) {
+  return String(value || "").toLowerCase().includes(query);
 }
 
 function getSearchBlob(day) {
@@ -810,42 +947,6 @@ function highlightMatch(text, query) {
   return result;
 }
 
-function pickSearchExcerpt(day, query) {
-  const daySource = getDaySource(day.id);
-  const candidates = [
-    day.title,
-    day.summary,
-    day.route,
-    day.logistics,
-    ...day.highlights,
-    ...day.food,
-    ...day.tips,
-    ...(daySource?.paragraphs || []),
-    ...((daySource?.images || []).map((image) => image.reference_excerpt)),
-  ];
-  const normalizedQuery = query.trim().toLowerCase();
-
-  if (!normalizedQuery) {
-    return day.summary;
-  }
-
-  return candidates.find((candidate) => candidate.toLowerCase().includes(normalizedQuery)) || day.summary;
-}
-
-function resolvePitfallQuote(template) {
-  const daySource = getDaySource(template.dayId);
-  if (daySource?.paragraphs?.length) {
-    const match = daySource.paragraphs.find((paragraph) =>
-      template.terms.some((term) => paragraph.includes(term)),
-    );
-    if (match) {
-      return match;
-    }
-  }
-
-  return template.fallback;
-}
-
 function syncBodyLock() {
   document.body.classList.toggle(
     "has-modal-open",
@@ -853,10 +954,63 @@ function syncBodyLock() {
   );
 }
 
-function scrollToSection(sectionId) {
+function buildHash(paramsObject = {}) {
+  const params = new URLSearchParams();
+  Object.entries(paramsObject).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === "") return;
+    params.set(key, String(value));
+  });
+  return params.toString();
+}
+
+function setHash(paramsObject = {}) {
+  const hash = buildHash(paramsObject);
+  const nextUrl = `${window.location.pathname}${window.location.search}${hash ? `#${hash}` : ""}`;
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (currentUrl === nextUrl) return;
+
+  hashSyncSuspended = true;
+  history.replaceState(null, "", nextUrl);
+  window.setTimeout(() => {
+    hashSyncSuspended = false;
+  }, 0);
+}
+
+function syncHashFromState() {
+  if (state.lightboxOpen && state.lightboxDayId) {
+    const images = getDayImageItems(state.lightboxDayId);
+    const image = images[state.lightboxIndex];
+    setHash({
+      image: image ? `${state.lightboxDayId}:${image.sequence}` : state.lightboxDayId,
+      tab: "gallery",
+    });
+    return;
+  }
+
+  if (state.detailOpen && state.detailDayId) {
+    setHash({
+      day: state.detailDayId,
+      tab: state.detailTab,
+      source: state.detailTab === "source" && state.sourceFocusSequence ? state.sourceFocusSequence : "",
+    });
+    return;
+  }
+
+  const toolHash = state.pitfallCategory !== "all"
+    ? `pitfalls:${state.pitfallCategory}`
+    : state.activeSection;
+  setHash({ tool: toolHash });
+}
+
+function scrollToSection(sectionId, options = {}) {
   const target = document.getElementById(sectionId);
   if (!target) return;
+
   target.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!options.skipHashSync) {
+    state.activeSection = sectionId;
+    syncHashFromState();
+  }
 }
 
 function renderRouteStrip() {
@@ -907,19 +1061,57 @@ function renderPhaseFilters() {
     .join("");
 }
 
-function renderPitfalls() {
-  els.pitfallList.innerHTML = pitfallTemplates
-    .map((item) => {
-      const quote = resolvePitfallQuote(item);
+function resolvePitfallQuote(template) {
+  const daySource = getDaySource(template.dayId);
+  if (daySource?.paragraphs?.length) {
+    const match = daySource.paragraphs.find((paragraph) =>
+      template.terms.some((term) => paragraph.includes(term)),
+    );
+    if (match) {
+      return match;
+    }
+  }
+  return template.fallback;
+}
 
-      return `
-        <button class="pitfall-chip" type="button" data-open-day="${escapeHtml(item.dayId)}">
-          <strong>${escapeHtml(`${item.category} · ${item.title}`)}</strong>
-          <span>${escapeHtml(trimText(quote, 104))}</span>
-        </button>
-      `;
-    })
-    .join("");
+function getPitfallItems() {
+  return pitfallTemplates
+    .filter((item) => state.pitfallCategory === "all" || item.category === state.pitfallCategory)
+    .map((item) => ({
+      ...item,
+      quote: resolvePitfallQuote(item),
+    }));
+}
+
+function renderPitfallFilters() {
+  els.pitfallFilters.innerHTML = PITFALL_CATEGORIES.map((category) => {
+    const label = category === "all" ? "全部坑位" : category;
+    return `
+      <button
+        class="pitfall-filter ${category === state.pitfallCategory ? "is-active" : ""}"
+        type="button"
+        data-pitfall-category="${escapeHtml(category)}"
+      >
+        ${escapeHtml(label)}
+      </button>
+    `;
+  }).join("");
+}
+
+function renderPitfalls() {
+  const items = getPitfallItems();
+  els.pitfallList.innerHTML = items.length
+    ? items
+        .map(
+          (item) => `
+            <button class="pitfall-chip" type="button" data-open-day="${escapeHtml(item.dayId)}" data-open-tab="source">
+              <strong>${escapeHtml(`${item.category} · ${item.title}`)}</strong>
+              <span>${escapeHtml(trimText(item.quote, 104))}</span>
+            </button>
+          `,
+        )
+        .join("")
+    : `<div class="empty-state">这个分类下暂时没有坑位提醒。</div>`;
 }
 
 function renderFeaturedGallery(days) {
@@ -993,6 +1185,41 @@ function renderDayCards(days) {
     .join("");
 }
 
+function renderBookingTools() {
+  els.bookingTools.innerHTML = bookingToolCards
+    .map(
+      (card) => `
+        <article class="tool-card">
+          <h3>${escapeHtml(card.title)}</h3>
+          <p>${escapeHtml(card.body)}</p>
+          <div class="tool-card__meta">
+            ${card.meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+          </div>
+          <div class="tool-card__actions">
+            ${card.actions
+              .map(
+                (action) => `
+                  <button
+                    type="button"
+                    data-tool-kind="${escapeHtml(action.kind)}"
+                    data-tool-target="${escapeHtml(action.target || "")}"
+                    data-tool-day="${escapeHtml(action.dayId || "")}"
+                    data-tool-tab="${escapeHtml(action.tab || "")}"
+                    data-tool-phase="${escapeHtml(action.phase || "")}"
+                    data-tool-category="${escapeHtml(action.category || "")}"
+                  >
+                    ${escapeHtml(action.label)}
+                  </button>
+                `,
+              )
+              .join("")}
+          </div>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function renderBooking() {
   els.bookingList.innerHTML = bookingTimeline
     .map(
@@ -1022,66 +1249,223 @@ function renderGlobalNotes() {
     .join("");
 }
 
+function renderPackingActions() {
+  const totalItems = packingGroups.reduce((sum, group) => sum + group.items.length, 0);
+  const doneItems = Object.values(state.packing).filter(Boolean).length;
+  els.packingActions.innerHTML = `
+    <button type="button" data-pack-action="expand">全部展开</button>
+    <button type="button" data-pack-action="collapse">全部收起</button>
+    <button type="button" data-pack-action="reset">清空全部</button>
+    <button type="button" disabled>已勾选 ${doneItems} / ${totalItems}</button>
+  `;
+}
+
 function renderPacking() {
+  renderPackingActions();
   els.packingList.innerHTML = packingGroups
     .map((group) => {
       const completeCount = group.items.filter((_, index) => state.packing[`${group.id}-${index}`]).length;
+      const isOpen = state.packingOpenGroups[group.id] !== false;
 
       return `
-        <section class="packing-card">
+        <section class="packing-card ${isOpen ? "" : "is-collapsed"}">
           <div class="packing-card__head">
             <h3>${escapeHtml(group.title)}</h3>
-            <button class="packing-reset" type="button" data-reset-pack="${escapeHtml(group.id)}">清空本组</button>
+            <button type="button" data-toggle-pack-group="${escapeHtml(group.id)}">${isOpen ? "收起" : "展开"}</button>
           </div>
           <p class="packing-summary">已勾选 ${completeCount} / ${group.items.length}</p>
-          ${group.items
-            .map((item, index) => {
-              const key = `${group.id}-${index}`;
-              const checked = Boolean(state.packing[key]);
-
-              return `
-                <div class="packing-item">
-                  <input id="${escapeHtml(key)}" type="checkbox" data-pack-key="${escapeHtml(key)}" ${checked ? "checked" : ""} />
-                  <label for="${escapeHtml(key)}">
-                    <span class="packing-item__box">✓</span>
-                    <span class="packing-item__text">${escapeHtml(item)}</span>
-                  </label>
-                </div>
-              `;
-            })
-            .join("")}
+          <div class="packing-card__items">
+            ${group.items
+              .map((item, index) => {
+                const key = `${group.id}-${index}`;
+                const checked = Boolean(state.packing[key]);
+                return `
+                  <div class="packing-item">
+                    <input id="${escapeHtml(key)}" type="checkbox" data-pack-key="${escapeHtml(key)}" ${checked ? "checked" : ""} />
+                    <label for="${escapeHtml(key)}">
+                      <span class="packing-item__box">✓</span>
+                      <span class="packing-item__text">${escapeHtml(item)}</span>
+                    </label>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
         </section>
       `;
     })
     .join("");
 }
 
-function renderSearchResults() {
+function buildSearchResults() {
   const query = state.searchQuery.trim().toLowerCase();
-  const results = query ? dayData.filter((day) => getSearchBlob(day).includes(query)) : dayData;
+  const groups = {
+    days: [],
+    places: [],
+    food: [],
+    source: [],
+    images: [],
+  };
 
-  if (!results.length) {
-    els.searchResults.innerHTML = `<div class="empty-state">没有搜到匹配结果。试试“泸沽湖”“独克宗”“蓝月谷”或“飞来寺”。</div>`;
+  if (!query) {
+    dayData.forEach((day) => {
+      groups.days.push({
+        group: "days",
+        typeLabel: "天数",
+        dayId: day.id,
+        tab: "route",
+        title: day.title,
+        excerpt: day.summary,
+      });
+    });
+    return groups;
+  }
+
+  dayData.forEach((day) => {
+    const daySource = getDaySource(day.id);
+
+    if ((state.searchMode === "all" || state.searchMode === "days")
+      && [day.day, day.date, day.city, day.title, day.summary, day.phaseLabel].some((value) => includesQuery(value, query))) {
+      groups.days.push({
+        group: "days",
+        typeLabel: "天数",
+        dayId: day.id,
+        tab: "route",
+        title: day.title,
+        excerpt: day.summary,
+      });
+    }
+
+    if ((state.searchMode === "all" || state.searchMode === "places")) {
+      const placeMatch = [day.route, ...day.highlights, daySource?.headline || "", ...(daySource?.paragraphs || [])]
+        .find((value) => includesQuery(value, query));
+      if (placeMatch) {
+        groups.places.push({
+          group: "places",
+          typeLabel: "景点",
+          dayId: day.id,
+          tab: "route",
+          title: `${day.day} · ${day.city}`,
+          excerpt: placeMatch,
+        });
+      }
+    }
+
+    if ((state.searchMode === "all" || state.searchMode === "food")) {
+      const foodMatch = [...day.food, day.stay, ...(daySource?.paragraphs || [])]
+        .find((value) => includesQuery(value, query));
+      if (foodMatch) {
+        groups.food.push({
+          group: "food",
+          typeLabel: "吃住",
+          dayId: day.id,
+          tab: "stay",
+          title: `${day.day} · ${day.city}`,
+          excerpt: foodMatch,
+        });
+      }
+    }
+
+    if ((state.searchMode === "all" || state.searchMode === "source")) {
+      const paragraphMatch = (daySource?.paragraphs || []).find((value) => includesQuery(value, query));
+      if (paragraphMatch) {
+        groups.source.push({
+          group: "source",
+          typeLabel: "原文",
+          dayId: day.id,
+          tab: "source",
+          title: `${day.day} · ${day.title}`,
+          excerpt: paragraphMatch,
+        });
+      }
+    }
+
+    if ((state.searchMode === "all" || state.searchMode === "images")) {
+      const imageMatch = (daySource?.images || []).find((image) =>
+        [image.reference_excerpt, image.reference_before, image.reference_after].some((value) => includesQuery(value, query)),
+      );
+      if (imageMatch) {
+        groups.images.push({
+          group: "images",
+          typeLabel: "图片",
+          dayId: day.id,
+          tab: "gallery",
+          title: `${day.day} · ${day.title}`,
+          excerpt: imageMatch.reference_excerpt || imageMatch.reference_after || imageMatch.reference_before,
+          imageSequence: imageMatch.sequence,
+        });
+      }
+    }
+  });
+
+  return groups;
+}
+
+function renderSearchFilters() {
+  els.searchFilters.innerHTML = SEARCH_FILTERS
+    .map(
+      (filter) => `
+        <button
+          class="search-filter ${filter.id === state.searchMode ? "is-active" : ""}"
+          type="button"
+          data-search-mode="${escapeHtml(filter.id)}"
+        >
+          ${escapeHtml(filter.label)}
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function renderSearchResults() {
+  renderSearchFilters();
+  const groups = buildSearchResults();
+  const groupOrder = state.searchMode === "all"
+    ? SEARCH_FILTERS.filter((item) => item.id !== "all").map((item) => item.id)
+    : [state.searchMode];
+  const visibleGroups = groupOrder.filter((groupId) => (groups[groupId] || []).length);
+  const total = visibleGroups.reduce((sum, groupId) => sum + groups[groupId].length, 0);
+
+  if (!visibleGroups.length) {
+    els.searchSummary.textContent = "没有搜到匹配结果。试试“泸沽湖”“独克宗”“蓝月谷”或“飞来寺”。";
+    els.searchResults.innerHTML = `<div class="empty-state">没有搜到匹配结果。换个关键词，或者切到别的搜索类型试试。</div>`;
     return;
   }
 
-  els.searchResults.innerHTML = results
-    .map((day) => {
-      const excerpt = pickSearchExcerpt(day, query);
-      const highlightText = highlightMatch(excerpt, query);
+  els.searchSummary.textContent = state.searchQuery.trim()
+    ? `共找到 ${total} 条结果，覆盖 ${visibleGroups.length} 个分组。`
+    : "未输入关键词时，先给你全部天数作为快速入口。";
 
-      return `
-        <button class="search-result" type="button" data-open-day="${escapeHtml(day.id)}">
-          <div class="detail-tags">
-            <span>${escapeHtml(day.day)}</span>
-            <span>${escapeHtml(day.city)}</span>
-            <span>${escapeHtml(day.phaseLabel)}</span>
-          </div>
-          <h3>${highlightMatch(day.title, query)}</h3>
-          <p>${highlightText}</p>
-        </button>
-      `;
-    })
+  els.searchResults.innerHTML = visibleGroups
+    .map((groupId) => `
+      <section class="search-group">
+        <div class="search-group__head">
+          <h3>${escapeHtml(SEARCH_GROUP_LABELS[groupId])}</h3>
+          <span>${escapeHtml(`${groups[groupId].length} 条`)}</span>
+        </div>
+        ${groups[groupId]
+          .map((result) => {
+            const detailTags = [result.dayId, getDayById(result.dayId)?.city || ""].filter(Boolean);
+            return `
+              <button
+                class="search-result"
+                type="button"
+                data-result-day="${escapeHtml(result.dayId)}"
+                data-result-tab="${escapeHtml(result.tab || "route")}"
+                data-result-image="${escapeHtml(result.imageSequence || "")}"
+              >
+                <div class="detail-tags">
+                  <span class="search-result__type">${escapeHtml(result.typeLabel)}</span>
+                  ${detailTags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}
+                </div>
+                <h3>${highlightMatch(result.title, state.searchQuery.trim())}</h3>
+                <p>${highlightMatch(result.excerpt || "", state.searchQuery.trim())}</p>
+              </button>
+            `;
+          })
+          .join("")}
+      </section>
+    `)
     .join("");
 }
 
@@ -1162,7 +1546,7 @@ function renderGalleryTab(day) {
   return `
     <section class="detail-block">
       <h3>图文图廊</h3>
-      <p>图片顺序和原文上下文已经从 docx 素材包建立映射。点图可全屏，点“看原文”会跳到对应段落。</p>
+      <p>点图可全屏，点“看原文”会直接跳到对应段落。</p>
       <div class="detail-gallery">
         ${images
           .map(
@@ -1242,7 +1626,7 @@ function renderSourceTab(day) {
   return `
     <section class="detail-block">
       <h3>原文模式</h3>
-      <p>这里按文档原始阅读顺序，把文本段落和图片引用重新挂回来了。图和文现在可以相互跳转。</p>
+      <p>这里按文档原始阅读顺序，把文本段落和图片引用重新挂回来了。图和文可以相互跳转。</p>
     </section>
     <div class="source-flow">${blocksHtml}</div>
   `;
@@ -1301,7 +1685,6 @@ function focusSourceReferenceIfNeeded() {
   if (state.detailTab !== "source" || !state.sourceFocusSequence) return;
   const target = els.detailBody.querySelector(`[data-source-seq="${state.sourceFocusSequence}"]`);
   if (!target) return;
-
   window.setTimeout(() => {
     target.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 60);
@@ -1310,7 +1693,6 @@ function focusSourceReferenceIfNeeded() {
 function renderDetail() {
   const day = getDayById(state.detailDayId);
   if (!day) return;
-
   renderDetailHero(day);
   renderDetailGalleryRail(day);
   renderDetailTabs();
@@ -1357,29 +1739,39 @@ function closeSearch() {
   syncBodyLock();
 }
 
-function openDayDetail(dayId) {
+function openDayDetail(dayId, options = {}) {
   const day = getDayById(dayId);
   if (!day) return;
 
   state.detailDayId = day.id;
-  state.detailTab = "route";
-  state.detailImageIndex = 0;
-  state.sourceFocusSequence = null;
+  state.detailTab = options.tab || "route";
+  state.detailImageIndex = options.imageIndex ?? 0;
+  state.sourceFocusSequence = options.sourceSeq ?? null;
   state.detailOpen = true;
   els.detailShell.hidden = false;
-  closeSearch();
+  if (!options.preserveSearch) {
+    closeSearch();
+  }
   syncBodyLock();
   renderDetail();
+  if (!options.skipHashSync) {
+    syncHashFromState();
+  }
 }
 
-function closeDetail() {
+function closeDetail(options = {}) {
   state.detailOpen = false;
   els.detailShell.hidden = true;
-  closeLightbox();
+  if (!options.keepLightbox) {
+    closeLightbox({ skipHashSync: true });
+  }
   syncBodyLock();
+  if (!options.skipHashSync) {
+    syncHashFromState();
+  }
 }
 
-function openLightbox(dayId, index) {
+function openLightbox(dayId, index, options = {}) {
   const images = getDayImageItems(dayId);
   if (!images.length) return;
 
@@ -1392,12 +1784,18 @@ function openLightbox(dayId, index) {
   if (state.detailOpen) {
     renderDetail();
   }
+  if (!options.skipHashSync) {
+    syncHashFromState();
+  }
 }
 
-function closeLightbox() {
+function closeLightbox(options = {}) {
   state.lightboxOpen = false;
   els.lightboxShell.hidden = true;
   syncBodyLock();
+  if (!options.skipHashSync) {
+    syncHashFromState();
+  }
 }
 
 function navigateLightbox(delta) {
@@ -1410,18 +1808,23 @@ function navigateLightbox(delta) {
   if (state.detailOpen) {
     renderDetail();
   }
+  syncHashFromState();
 }
 
-function jumpToSource(sequence) {
+function jumpToSource(sequence, options = {}) {
   state.detailTab = "source";
   state.sourceFocusSequence = sequence;
-  closeLightbox();
+  closeLightbox({ skipHashSync: true });
   renderDetail();
+  if (!options.skipHashSync) {
+    syncHashFromState();
+  }
 }
 
 function renderPhaseScopedSections() {
   const days = getPhaseDays();
   renderPhaseFilters();
+  renderPitfallFilters();
   renderPitfalls();
   renderFeaturedGallery(days);
   renderDayCards(days);
@@ -1475,9 +1878,8 @@ function observeSections() {
 function handlePackingChange(input) {
   const key = input.dataset.packKey;
   if (!key) return;
-
   state.packing[key] = input.checked;
-  savePackingState();
+  saveJsonStorage(PACKING_STORAGE_KEY, state.packing);
   renderPacking();
 }
 
@@ -1487,8 +1889,27 @@ function resetPackingGroup(groupId) {
     .forEach((key) => {
       delete state.packing[key];
     });
+  saveJsonStorage(PACKING_STORAGE_KEY, state.packing);
+  renderPacking();
+}
 
-  savePackingState();
+function togglePackingGroup(groupId) {
+  state.packingOpenGroups[groupId] = !state.packingOpenGroups[groupId];
+  savePackingGroupState();
+  renderPacking();
+}
+
+function setAllPackingGroups(open) {
+  packingGroups.forEach((group) => {
+    state.packingOpenGroups[group.id] = open;
+  });
+  savePackingGroupState();
+  renderPacking();
+}
+
+function resetAllPacking() {
+  state.packing = {};
+  saveJsonStorage(PACKING_STORAGE_KEY, state.packing);
   renderPacking();
 }
 
@@ -1518,12 +1939,103 @@ async function loadDayMap() {
   }
 }
 
+function applyToolAction({ kind, target = "", dayId = "", tab = "", phase = "", category = "" }, options = {}) {
+  if (kind === "scroll" && target) {
+    scrollToSection(target === "toolsSection" ? "toolsSection" : target, options);
+    return;
+  }
+
+  if (kind === "phase" && phase) {
+    state.phase = phase;
+    renderPhaseScopedSections();
+    scrollToSection("daysSection", options);
+    return;
+  }
+
+  if (kind === "pitfall" && category) {
+    state.pitfallCategory = category;
+    renderPitfallFilters();
+    renderPitfalls();
+    scrollToSection("overviewSection", options);
+    if (!options.skipHashSync) {
+      syncHashFromState();
+    }
+    return;
+  }
+
+  if (kind === "day" && dayId) {
+    openDayDetail(dayId, { tab: tab || "route", skipHashSync: options.skipHashSync });
+  }
+}
+
+function handleSearchResult(button) {
+  const dayId = button.dataset.resultDay;
+  const tab = button.dataset.resultTab || "route";
+  const imageSequence = button.dataset.resultImage;
+  if (!dayId) return;
+
+  if (imageSequence) {
+    const imageIndex = findImageIndexBySequence(dayId, Number(imageSequence));
+    openDayDetail(dayId, { tab: "gallery", imageIndex, skipHashSync: true });
+    openLightbox(dayId, Math.max(imageIndex, 0));
+    return;
+  }
+
+  openDayDetail(dayId, { tab });
+}
+
+function parseHashAndApply() {
+  if (hashSyncSuspended) return;
+
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+
+  const imageParam = params.get("image");
+  if (imageParam) {
+    const [dayId, sequence] = imageParam.split(":");
+    const imageIndex = sequence ? findImageIndexBySequence(dayId, Number(sequence)) : 0;
+    openDayDetail(dayId, { tab: "gallery", imageIndex: Math.max(imageIndex, 0), skipHashSync: true });
+    openLightbox(dayId, Math.max(imageIndex, 0), { skipHashSync: true });
+    return;
+  }
+
+  const dayParam = params.get("day");
+  if (dayParam) {
+    openDayDetail(dayParam, {
+      tab: params.get("tab") || "route",
+      sourceSeq: params.get("source") ? Number(params.get("source")) : null,
+      skipHashSync: true,
+    });
+    return;
+  }
+
+  const toolParam = params.get("tool");
+  if (toolParam?.startsWith("pitfalls:")) {
+    state.pitfallCategory = toolParam.split(":")[1] || "all";
+    renderPhaseScopedSections();
+    scrollToSection("overviewSection", { skipHashSync: true });
+    return;
+  }
+
+  if (toolParam) {
+    scrollToSection(toolParam, { skipHashSync: true });
+  }
+}
+
 function bindEvents() {
   els.openSearchBtn.addEventListener("click", openSearch);
   els.openSearchInlineBtn.addEventListener("click", openSearch);
 
   els.searchInput.addEventListener("input", (event) => {
     state.searchQuery = event.target.value || "";
+    renderSearchResults();
+  });
+
+  els.searchFilters.addEventListener("click", (event) => {
+    const mode = event.target.closest("[data-search-mode]")?.dataset.searchMode;
+    if (!mode || mode === state.searchMode) return;
+    state.searchMode = mode;
     renderSearchResults();
   });
 
@@ -1552,10 +2064,20 @@ function bindEvents() {
     renderPhaseScopedSections();
   });
 
+  els.pitfallFilters.addEventListener("click", (event) => {
+    const category = event.target.closest("[data-pitfall-category]")?.dataset.pitfallCategory;
+    if (!category || category === state.pitfallCategory) return;
+    state.pitfallCategory = category;
+    renderPitfallFilters();
+    renderPitfalls();
+    syncHashFromState();
+  });
+
   els.pitfallList.addEventListener("click", (event) => {
-    const dayId = event.target.closest("[data-open-day]")?.dataset.openDay;
+    const button = event.target.closest("[data-open-day]");
+    const dayId = button?.dataset.openDay;
     if (!dayId) return;
-    openDayDetail(dayId);
+    openDayDetail(dayId, { tab: button.dataset.openTab || "route" });
   });
 
   els.featuredGallery.addEventListener("click", (event) => {
@@ -1570,10 +2092,23 @@ function bindEvents() {
     openDayDetail(dayId);
   });
 
+  els.bookingTools.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-tool-kind]");
+    if (!button) return;
+    applyToolAction({
+      kind: button.dataset.toolKind || "",
+      target: button.dataset.toolTarget || "",
+      dayId: button.dataset.toolDay || "",
+      tab: button.dataset.toolTab || "",
+      phase: button.dataset.toolPhase || "",
+      category: button.dataset.toolCategory || "",
+    });
+  });
+
   els.searchResults.addEventListener("click", (event) => {
-    const dayId = event.target.closest("[data-open-day]")?.dataset.openDay;
-    if (!dayId) return;
-    openDayDetail(dayId);
+    const button = event.target.closest("[data-result-day]");
+    if (!button) return;
+    handleSearchResult(button);
   });
 
   els.detailLeadImage.addEventListener("click", () => {
@@ -1593,6 +2128,7 @@ function bindEvents() {
     state.detailTab = nextTab;
     state.sourceFocusSequence = null;
     renderDetail();
+    syncHashFromState();
   });
 
   els.detailBody.addEventListener("click", (event) => {
@@ -1629,6 +2165,14 @@ function bindEvents() {
     jumpToSource(image.sequence);
   });
 
+  els.packingActions.addEventListener("click", (event) => {
+    const action = event.target.closest("[data-pack-action]")?.dataset.packAction;
+    if (!action) return;
+    if (action === "expand") setAllPackingGroups(true);
+    if (action === "collapse") setAllPackingGroups(false);
+    if (action === "reset") resetAllPacking();
+  });
+
   els.packingList.addEventListener("change", (event) => {
     const input = event.target.closest("[data-pack-key]");
     if (!(input instanceof HTMLInputElement)) return;
@@ -1636,9 +2180,16 @@ function bindEvents() {
   });
 
   els.packingList.addEventListener("click", (event) => {
-    const groupId = event.target.closest("[data-reset-pack]")?.dataset.resetPack;
-    if (!groupId) return;
-    resetPackingGroup(groupId);
+    const groupToggle = event.target.closest("[data-toggle-pack-group]")?.dataset.togglePackGroup;
+    if (groupToggle) {
+      togglePackingGroup(groupToggle);
+      return;
+    }
+
+    const groupReset = event.target.closest("[data-reset-pack]")?.dataset.resetPack;
+    if (groupReset) {
+      resetPackingGroup(groupReset);
+    }
   });
 
   els.bottomNav.addEventListener("click", (event) => {
@@ -1674,11 +2225,13 @@ function bindEvents() {
   });
 
   window.addEventListener("scroll", updateScrollProgress, { passive: true });
+  window.addEventListener("hashchange", parseHashAndApply);
 }
 
 async function init() {
   renderRouteStrip();
   renderOverviewTools();
+  renderBookingTools();
   renderBooking();
   renderGlobalNotes();
   renderPacking();
@@ -1695,6 +2248,7 @@ async function init() {
   if (state.detailOpen) {
     renderDetail();
   }
+  parseHashAndApply();
 }
 
 void init();
